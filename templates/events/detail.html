@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}{{ item.title }} — Wydarzenia{% endblock %}
+{% block content %}
+<article>
+  <h1>{{ item.title }}</h1>
+  {% if item.cover_url %}<img src="{{ item.cover_url }}" alt="" loading="lazy" style="max-width:640px" />{% endif %}
+  <p>
+    <strong>Kiedy:</strong> {{ item.start_date }}{% if item.end_date %} – {{ item.end_date }}{% endif %}
+    {% if item.location %}<br><strong>Miejsce:</strong> {{ item.location }}{% endif %}
+  </p>
+  <div class="content">{{ item.description|linebreaks }}</div>
+</article>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Wydarzenia — Kolejowy PTTK{% endblock %}
+{% block content %}
+<h1>Wydarzenia</h1>
+<ul>
+{% for e in items %}
+  <li>
+    <a href="{{ e.get_absolute_url }}">{{ e.title }}</a>
+    — {{ e.start_date }}{% if e.end_date %} – {{ e.end_date }}{% endif %}
+    {% if e.location %} — {{ e.location }}{% endif %}
+  </li>
+{% empty %}
+  <li>Brak wydarzeń.</li>
+{% endfor %}
+</ul>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Galeria — Kolejowy PTTK{% endblock %}
+{% block content %}
+<h1>Galeria (Facebook)</h1>
+<ul>
+  {% for a in albums %}
+    <li><a href="{% url 'gallery_album_detail' a.fb_album_id %}">{{ a.name|default:a.fb_album_id }}</a> ({{ a.count }})</li>
+  {% empty %}
+    <li>Brak albumów.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

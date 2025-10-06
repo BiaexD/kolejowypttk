@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Kontakt — Kolejowy PTTK{% endblock %}
+{% block content %}
+<h1>Kontakt</h1>
+<form method="post" novalidate>
+  {% csrf_token %}
+  <div>
+    <label>Imię i nazwisko</label>
+    {{ form.name }} {{ form.name.errors }}
+  </div>
+  <div>
+    <label>Email</label>
+    {{ form.email }} {{ form.email.errors }}
+  </div>
+  <div>
+    <label>Wiadomość</label>
+    {{ form.message }} {{ form.message.errors }}
+  </div>
+  <div style="display:none">{{ form.honeypot }}</div>
+  <button type="submit">Wyślij</button>
+</form>
+{% endblock %}

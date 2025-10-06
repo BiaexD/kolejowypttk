@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}{{ item.title|default:"Post z Facebooka" }} — Aktualności{% endblock %}
+{% block content %}
+<article>
+  <h1>{{ item.title|default:"Post z Facebooka" }}</h1>
+  <p><em>{{ item.published_at|date:'Y-m-d H:i' }}</em></p>
+  {% if item.image_url %}
+    <img src="{{ item.image_url }}" alt="" loading="lazy" style="max-width:640px" />
+  {% endif %}
+  <div class="content">{{ item.body|linebreaks }}</div>
+    {% if item.fb_perma %}
+      <p class="fb-link">
+        <a href="{{ item.fb_perma }}" target="_blank" rel="noopener" aria-label="Zobacz na Facebooku">
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M22 12.07C22 6.48 17.52 2 11.93 2S2 6.48 2 12.07c0 5.02 3.66 9.18 8.44 9.93v-7.03H7.9v-2.9h2.54V9.41c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.87h2.78l-.44 2.9h-2.34V22c4.78-.75 8.44-4.91 8.44-9.93z"/>
+          </svg>
+          Zobacz na Facebooku
+        </a>
+      </p>
+    {% endif %}
+
+</article>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Dokumenty — Kolejowy PTTK{% endblock %}
+{% block content %}
+<h1>Dokumenty do pobrania</h1>
+<ul>
+  {% for d in docs %}
+    <li>
+      {% if d.category %}<strong>[{{ d.category }}]</strong>{% endif %}
+      {{ d.title }} — <a href="{{ d.file_url }}" target="_blank" rel="noopener">Pobierz</a>
+    </li>
+  {% empty %}
+    <li>Brak dokumentów.</li>
+  {% endfor %}
+</ul>
+{% endblock %}
