@@ -1,0 +1,26 @@
+{# templates/partials/hero.html #}
+<section class="hero-slider" data-interval="5000">
+  {% for h in hero %}
+    <div class="slide{% if forloop.first %} is-active{% endif %}" style="--bg:url('{% static h.image_url %}')">
+      <div class="hero-overlay"></div>
+    </div>
+  {% empty %}
+    <div class="slide is-active" style="--bg:url('{% static 'img/og-default.jpg' %}')">
+      <div class="hero-overlay"></div>
+    </div>
+  {% endfor %}
+
+  <nav class="hero-side">
+    <a href="{% url 'history' %}">Historia</a>
+    <a href="{% url 'badges' %}">Odznaki</a>
+    <a href="{% url 'news_list' %}">Aktualności</a>
+    <a href="{% url 'events_list' %}">Wydarzenia</a>
+    <a href="{% url 'gallery' %}">Galeria</a>
+  </nav>
+
+  <div class="hero-dots">
+    {% for h in hero %}
+      <button class="dot{% if forloop.first %} is-active{% endif %}"></button>
+    {% endfor %}
+  </div>
+</section>

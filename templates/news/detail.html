@@ -1,6 +1,14 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}{{ item.title|default:"Post z Facebooka" }} — Aktualności{% endblock %}
+
+{% block hero %}
+  {% include 'partials/hero.html' %}
+{% endblock %}
+
 {% block content %}
+
 <article>
   <h1>{{ item.title|default:"Post z Facebooka" }}</h1>
   <p><em>{{ item.published_at|date:'Y-m-d H:i' }}</em></p>
@@ -20,4 +28,5 @@
     {% endif %}
 
 </article>
+
 {% endblock %}

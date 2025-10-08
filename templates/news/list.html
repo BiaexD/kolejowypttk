@@ -1,6 +1,14 @@
 {% extends 'base.html' %}
-{% block title %}Aktualności — Kolejowy PTTK{% endblock %}
+{% load static %}
+
+{% block title %}Aktualności — {{ SITE_NAME }}{% endblock %}
+
+{% block hero %}
+  {% include 'partials/hero.html' %}
+{% endblock %}
+
 {% block content %}
+
 <h1>Aktualności</h1>
 {% for item in items %}
   <article>
@@ -24,5 +32,6 @@
   <hr />
 {% empty %}
   <p>Brak aktualności.</p>
+
 {% endfor %}
 {% endblock %}

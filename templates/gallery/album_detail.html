@@ -1,6 +1,14 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}Galeria — {{ album.name|default:album.fb_album_id }}{% endblock %}
+
+{% block hero %}
+  {% include 'partials/hero.html' %}
+{% endblock %}
+
 {% block content %}
+
 <h1>{{ album.name|default:album.fb_album_id }}</h1>
 <div class="grid">
   {% for p in photos %}
@@ -11,4 +19,5 @@
     <p>Brak zdjęć w tym albumie.</p>
   {% endfor %}
 </div>
+
 {% endblock %}

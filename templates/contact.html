@@ -1,6 +1,14 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}Kontakt — Kolejowy PTTK{% endblock %}
+
+{% block hero %}
+  {% include 'partials/hero.html' %}
+{% endblock %}
+
 {% block content %}
+
 <h1>Kontakt</h1>
 <form method="post" novalidate>
   {% csrf_token %}
@@ -19,4 +27,5 @@
   <div style="display:none">{{ form.honeypot }}</div>
   <button type="submit">Wyślij</button>
 </form>
+
 {% endblock %}

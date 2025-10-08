@@ -1,6 +1,14 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}Wydarzenia — Kolejowy PTTK{% endblock %}
+
+{% block hero %}
+  {% include 'partials/hero.html' %}
+{% endblock %}
+
 {% block content %}
+
 <h1>Wydarzenia</h1>
 <ul>
 {% for e in items %}
@@ -13,4 +21,5 @@
   <li>Brak wydarzeń.</li>
 {% endfor %}
 </ul>
+
 {% endblock %}
