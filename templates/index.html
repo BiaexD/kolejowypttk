@@ -1,31 +1,11 @@
 {% extends 'base.html' %}
 {% block title %}Strona główna — {{ SITE_NAME }}{% endblock %}
+
+{% block hero %}
+  {% include 'partials/hero.html' %}
+{% endblock %}
+
 {% block content %}
-
-<section class="hero-slider" data-interval="5000">
-  {% for h in hero %}
-    <div class="slide{% if forloop.first %} is-active{% endif %}"
-         style="--bg:url('{{ h.image_url }}')">
-      <div class="hero-overlay"></div>
-    </div>
-  {% endfor %}
-
-    <nav class="hero-side">
-      <a href="/historia/">Historia</a>
-      <a href="/odznaki/">Odznaki</a>
-      <a href="/aktualnosci/">Aktualności</a>
-      <a href="/wydarzenia/">Wydarzenia</a>
-      <a href="/galeria/">Galeria</a>
-      <a href="/dokumenty/">Dokumenty</a>
-    </nav>
-
-  <div class="hero-dots">
-    {% for h in hero %}
-      <button class="dot{% if forloop.first %} is-active{% endif %}"></button>
-    {% endfor %}
-  </div>
-</section>
-
 <h2>Nadchodzące wydarzenia</h2>
 <ul>
   {% for e in events %}

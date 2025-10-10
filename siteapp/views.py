@@ -8,8 +8,7 @@ def index(request):
     news   = Post.objects.filter(is_published=True).order_by('-published_at')[:4]
     events = Event.objects.filter(is_published=True, start_date__gte=timezone.localdate()).order_by('start_date')[:3]
     albums = FbAlbum.objects.order_by('-updated')[:6]
-    hero   = HeroImage.objects.filter(is_active=True).order_by('order')[:5]
-    return render(request, 'index.html', {'news': news, 'events': events, 'albums': albums, 'hero': hero})
+    return render(request, 'index.html', {'news': news, 'events': events, 'albums': albums})
 
 def news_list(request):
     items = Post.objects.filter(is_published=True).order_by('-published_at')

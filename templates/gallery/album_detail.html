@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
 {% block title %}Galeria — {{ album.name|default:album.fb_album_id }}{% endblock %}
+
+{% block hero %}
+  {% include 'partials/hero.html' %}
+{% endblock %}
+
 {% block content %}
 <h1>{{ album.name|default:album.fb_album_id }}</h1>
 <div class="grid">
