@@ -107,6 +107,30 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "ERROR",  # możesz też ustawić WARNING albo DEBUG
+        },
+        "django.request": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "django.template": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+    },
+}
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SITE_NAME = "PTTK Pracowników Kolejowych w Poznaniu "
@@ -118,14 +142,3 @@ ORG_PHONE = "+48 (61) 821 92 20"
 ORG_NIP = "7792249232"
 ORG_REGON = "634648428"
 ORG_KRS = "0000208383"
-
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {"console": {"class": "logging.StreamHandler"}},
-    "root": {"handlers": ["console"], "level": "ERROR"},  # możesz podnieść do "WARNING"
-    "loggers": {
-        "django.request": {"handlers": ["console"], "level": "ERROR", "propagate": False},
-        "django.template": {"handlers": ["console"], "level": "ERROR", "propagate": False},
-    },
-}
