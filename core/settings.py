@@ -19,10 +19,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-change-me')
-DEBUG = os.getenv("DEBUG", "0") == "1"
+# DEBUG = os.getenv("DEBUG", "0") == "1"
+
+DEBUG = True
+SECURE_SSL_REDIRECT = False
+SECURE_PROXY_SSL_HEADER = None
+
+if DEBUG:
+    SECURE_SSL_REDIRECT = False
 
 raw_hosts = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1")
-ALLOWED_HOSTS = [h.strip() for h in raw_hosts.split(",") if h.strip()]
+ALLOWED_HOSTS = [
+    "46.224.115.32",
+    "localhost",
+    "127.0.0.1",
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -36,8 +47,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware'
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
