@@ -1,16 +1,27 @@
 {% load static %}
 <section class="hero-slider" data-interval="5000">
-  {% for h in hero %}
-    <div class="slide{% if forloop.first %} is-active{% endif %}"
-         style="--bg:url('{% static h.image_url %}')">
-      <div class="hero-overlay"></div>
-    </div>
-  {% empty %}
-    <div class="slide is-active" style="--bg:url('{% static 'img/og-default.jpg' %}')">
-      <div class="hero-overlay"></div>
-    </div>
-  {% endfor %}
 
+  {# SLIDES: pokażemy tylko na desktop, na mobile ukryjemy #}
+  <div class="hero-slides">
+    {% for h in hero %}
+      <div class="slide{% if forloop.first %} is-active{% endif %}"
+           style="--bg:url('{% static h.image_url %}')">
+        <div class="hero-overlay"></div>
+      </div>
+    {% empty %}
+      <div class="slide is-active" style="--bg:url('{% static 'img/og-default.jpg' %}')">
+        <div class="hero-overlay"></div>
+      </div>
+    {% endfor %}
+
+    <div class="hero-dots">
+      {% for _ in hero %}
+        <button class="dot{% if forloop.first %} is-active{% endif %}"></button>
+      {% endfor %}
+    </div>
+  </div>
+
+  {# MENU: zawsze widoczne (desktop i mobile) #}
   <nav class="hero-side">
     <a href="/historia/">Historia</a>
     <a href="/odznaki/">Odznaki</a>
@@ -20,10 +31,5 @@
     <a href="/dokumenty/">Dokumenty</a>
   </nav>
 
-  <div class="hero-dots">
-    {% for _ in hero %}
-      <button class="dot{% if forloop.first %} is-active{% endif %}"></button>
-    {% endfor %}
-  </div>
 </section>
 

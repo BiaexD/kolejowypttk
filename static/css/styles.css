@@ -72,19 +72,15 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:
 h1,h2,h3{color:var(--pttk-dark);margin:.6rem 0}
 img{max-width:100%;height:auto}
 
-
-
 /* cards / grids */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem}
 .card{border:1px solid #eee;border-radius:14px;padding:1rem;background:#fff}
 .card img{border-radius:10px}
 
-
 /* messages */
 .messages{list-style:none;margin:0;padding:0}
 .messages li{padding:.6rem 1rem;border:1px solid #cfe3cf;background:#f6fff6;border-radius:8px;margin:.5rem 0}
-
 
 /* footer */
 .footer {
@@ -112,7 +108,6 @@ img{max-width:100%;height:auto}
 }
 copyright{color:#888;font-size:.9rem}
 
-
 /* fb link badge */
 .fb-link a {
   display: inline-flex;
@@ -124,10 +119,8 @@ copyright{color:#888;font-size:.9rem}
 }
 .fb-link a:hover{text-decoration:underline}
 
-
 /* small helpers */
 .lead{font-weight:600}
-
 
 /* HERO slider */
 .hero-slider{
@@ -145,6 +138,12 @@ copyright{color:#888;font-size:.9rem}
   border-radius: 0;           /* na wszelki wypadek */
 }
 
+/* NOWE: wrapper na slajdy (żeby można je schować na mobile) */
+.hero-slides{
+  position: absolute;
+  inset: 0;
+}
+
 .hero-slider .slide{
   position:absolute; inset:0;
   background-image: var(--bg);
@@ -153,13 +152,16 @@ copyright{color:#888;font-size:.9rem}
   opacity:0; transition: opacity 800ms ease-in-out;
 }
 .hero-slider .slide.is-active{ opacity:1 }
+.hero-slider .slide { z-index: 0; }
+.hero-slider .hero-overlay { z-index: 1; }
+.hero-side, .hero-dots { z-index: 3; }
 
 .hero-slider .hero-overlay{
   position:absolute; inset:0;
   background: linear-gradient(0deg, rgba(0,0,0,.35), rgba(0,0,0,.15));
   box-shadow: inset 0 0 60px rgba(0,0,0,0.5);
+  pointer-events: none;
 }
-
 
 /* boczne przyciski */
 .hero-side{
@@ -184,13 +186,6 @@ copyright{color:#888;font-size:.9rem}
   background:rgba(255,255,255,.6);
 }
 .hero-dots .dot.is-active{ background:#fff }
-
-/* mobile: przyciski pod slajderem */
-@media (max-width: 700px){
-  .hero-side{ position:static; transform:none; flex-direction:row; justify-content:center; padding:.6rem; gap:.6rem }
-  .hero-side a{ min-width:auto }
-}
-
 
 /* Ikona FB w top-nav */
 .nav .fb-icon {
@@ -230,5 +225,53 @@ copyright{color:#888;font-size:.9rem}
 
   .nav .fb-icon{
     margin-left: .3rem;       /* mniejszy odstęp na telefonie */
+  }
+}
+
+/* === MOBILE: chowamy slajdy, zostaje tylko menu === */
+@media (max-width: 700px){
+
+  /* hero staje się zwykłym kontenerem (nie pełnoekranowy slider) */
+  .hero-slider{
+    width: auto;
+    left: auto;
+    right: auto;
+    margin-left: 0;
+    margin-right: 0;
+
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    padding: .6rem 0;
+  }
+
+  /* ukryj slajdy i kropki na mobile */
+  .hero-slides{
+    display: none;
+  }
+
+  /* menu jako pasek przewijany */
+  .hero-side{
+    position: static;
+    transform: none;
+
+    display: flex;
+    flex-direction: row;
+    gap: .6rem;
+    padding: .4rem 0;
+
+    justify-content: flex-start;
+    overflow-x: auto;
+    white-space: nowrap;
+
+    margin: 0;
+  }
+  .hero-side::-webkit-scrollbar{ display:none; }
+
+  .hero-side a{
+    min-width: auto;
+    white-space: nowrap;
+    padding: .55rem .85rem;
+    border-radius: 999px;
   }
 }
