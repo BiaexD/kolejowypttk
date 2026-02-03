@@ -12,8 +12,6 @@
 html,body{margin:0;padding:0}
 body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:var(--paper);line-height:1.55}
 
-
-
 /* layout */
 .container{max-width:1000px;margin:0 auto;padding:0 1rem}
 .header{display:flex;align-items:center;justify-content:space-between;padding:1rem 0;position:relative}
@@ -207,4 +205,30 @@ copyright{color:#888;font-size:.9rem}
 }
 .nav .fb-icon:hover svg {
   fill: #145dbf;
+}
+
+/* --- Mobile header polish (no hamburger) --- */
+@media (max-width: 700px){
+  .header{
+    gap: .75rem;
+    flex-wrap: wrap;          /* pozwala przejść do 2 linii, zamiast ściskać */
+  }
+
+  .brand{
+    flex: 1 1 100%;           /* logo + nazwa w pierwszej linii */
+  }
+
+  .nav{
+    flex: 1 1 100%;           /* linki w drugiej linii */
+    justify-content: flex-start;
+  }
+
+  .nav a{
+    padding: .4rem .6rem;     /* mniejsze klikane pola, żeby się zmieściło */
+    border-left: none;        /* separator na mobile robi ścisk */
+  }
+
+  .nav .fb-icon{
+    margin-left: .3rem;       /* mniejszy odstęp na telefonie */
+  }
 }
