@@ -15,13 +15,19 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:
 /* layout */
 .container{max-width:1000px;margin:0 auto;padding:0 1rem}
 .header{display:flex;align-items:center;justify-content:space-between;padding:1rem 0;position:relative}
-.header:after,.footer{border-top:4px dotted var(--rail-gray)}
-.header:before{
-  content:""; position:absolute; inset:auto 0 -2px 0; height:12px;
-  background:
-    repeating-linear-gradient(90deg, transparent 0 10px, var(--rail-gray) 10px 12px);
-  opacity:.35;
+/*.header:after,.footer{border-top:4px dotted var(--rail-gray)}*/
+
+/* === Drugi delikatny separator POD przyciskami w headerze === */
+.header::before{
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;        /* ODSTĘP POD PRZYCISKAMI */
+  border-top: 4px dotted var(--rail-gray);
+  opacity: .6;
 }
+
 .brand {
   display: flex;
   align-items: center;
@@ -273,5 +279,133 @@ copyright{color:#888;font-size:.9rem}
     white-space: nowrap;
     padding: .55rem .85rem;
     border-radius: 999px;
+  }
+}
+
+/* === MOBILE HEADER: jak Django Admin === */
+@media (max-width: 700px){
+
+  .header{
+    flex-direction: column;
+    align-items: stretch;
+    padding-bottom: .4rem;
+  }
+
+  /* GÓRA: logo + nazwa */
+  .brand{
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+  }
+
+  .brand-logo{
+    width: 64px;          /* mniejsze logo */
+  }
+
+  .brand-text{
+    font-size: 1.25rem;   /* mniejszy tytuł */
+    line-height: 1.15;
+  }
+
+  .brand-text small{
+    font-size: .9rem;
+  }
+
+  /* DÓŁ: nawigacja */
+  .nav{
+    margin-top: .4rem;
+    padding-top: .4rem;
+    border-top: 1px dotted var(--rail-gray);
+
+    display: flex;
+    gap: .6rem;
+    align-items: center;
+  }
+
+  .nav a{
+    padding: .35rem .4rem;
+    font-size: .95rem;
+    border-left: none;
+  }
+
+  .nav .fb-icon{
+    margin-left: auto; /* FB idzie na prawo */
+  }
+}
+
+/* === MOBILE: chowamy menu przy slajderze === */
+@media (max-width: 700px){
+  .hero-side{
+    display: none !important;
+  }
+}
+
+/* === MOBILE: hamburger + rozwijane menu === */
+.mobile-toggle{
+  display: none; /* domyślnie ukryty na desktop */
+}
+
+.mobile-menu{
+  display: none; /* domyślnie zamknięte */
+  background: #fff;
+  border-top: 1px dotted var(--rail-gray);
+  border-bottom: 1px dotted var(--rail-gray);
+  padding: .4rem 0;
+}
+
+.mobile-menu a{
+  display: block;
+  padding: .7rem 1rem;
+  text-decoration: none;
+  color: var(--pttk-dark);
+  font-weight: 600;
+}
+
+.mobile-menu a:hover{
+  background: #f6fff6;
+}
+
+/* stan otwarty */
+.mobile-menu.is-open{
+  display: block;
+}
+
+@media (max-width: 700px){
+  /* pokazujemy hamburger */
+  .mobile-toggle{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    padding: .35rem .6rem;
+    font-size: 1.25rem;
+    border: 1px solid var(--rail-gray);
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+  }
+
+  /* układ headera: brand u góry, pod spodem nav + hamburger */
+  .header{
+    flex-direction: column;
+    align-items: stretch;
+    gap: .4rem;
+  }
+
+  .brand{
+    width: 100%;
+  }
+
+  /* w jednym wierszu: nav + hamburger */
+  .nav{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+  }
+
+  /* FB po prawej, a hamburger na sam koniec */
+  .nav .fb-icon{
+    margin-left: auto;
   }
 }

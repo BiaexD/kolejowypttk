@@ -20,6 +20,13 @@
   </a>
 
     <nav class="nav">
+      <button class="mobile-toggle"
+        type="button"
+        aria-label="Menu"
+        aria-expanded="false"
+        aria-controls="mobile-menu">
+        ☰
+      </button>
       <a href="/wladze/">Władze</a>
       <a href="/kontakt/">Kontakt</a>
       {% if FACEBOOK_PAGE_URL %}
@@ -34,6 +41,14 @@
       </a>
       {% endif %}
     </nav>
+  <nav id="mobile-menu" class="mobile-menu" aria-label="Menu mobilne">
+    <a href="/historia/">Historia</a>
+    <a href="/odznaki/">Odznaki</a>
+    <a href="/aktualnosci/">Aktualności</a>
+    <a href="/wydarzenia/">Wydarzenia</a>
+    <a href="/galeria/">Galeria</a>
+    <a href="/dokumenty/">Dokumenty</a>
+  </nav>
 </header>
 
 {% block hero %}{% endblock %}
@@ -75,6 +90,37 @@
 </footer>
 
 <script src="{% static 'js/hero-slider.js' %}"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.querySelector('.mobile-toggle');
+    const menu = document.getElementById('mobile-menu');
+
+    if (!btn || !menu) return;
+
+    btn.addEventListener('click', () => {
+      const isOpen = menu.classList.toggle('is-open');
+      btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // kliknięcie w link zamyka menu
+    menu.addEventListener('click', (e) => {
+      if (e.target.tagName === 'A') {
+        menu.classList.remove('is-open');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // klik poza menu zamyka
+    document.addEventListener('click', (e) => {
+      if (!menu.contains(e.target) && e.target !== btn) {
+        menu.classList.remove('is-open');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  });
+</script>
+
 
 </body>
 </html>
