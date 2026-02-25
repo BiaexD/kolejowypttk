@@ -143,7 +143,7 @@ SITE_TAGLINE = "• Wielkopolska • turystyka • Polskie Towarzystwo Turystyki
 FACEBOOK_PAGE_URL = "https://www.facebook.com/profile.php?id=61581487138549"
 ORG_ADDRESS = "60-717 Poznań, ul. Kolejowa 23"
 ORG_EMAIL = "andrzej.kudlaszyk@wp.pl"
-ORG_PHONE = "+48 (61) 821 92 20"
+ORG_PHONE = "+48 603 429 235"
 ORG_NIP = "7792249232"
 ORG_REGON = "634648428"
 ORG_KRS = "0000208383"
