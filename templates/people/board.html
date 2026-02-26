@@ -9,19 +9,56 @@
 
 {% block content %}
 
-<h1>Władze Oddziału</h1>
-<div class="cards">
-  {% for p in people %}
-    <div class="card">
-      {% if p.photo_url %}<img src="{{ p.photo_url }}" alt="{{ p.name }}" loading="lazy" />{% endif %}
-      <h3>{{ p.name }}</h3>
-      <p>{{ p.get_role_display }}</p>
-      {% if p.email %}<p>Email: <a href="mailto:{% autoescape off %}{{ p.email }}{% endautoescape %}">{{ p.email }}</a></p>{% endif %}
-      {% if p.phone %}<p>Tel.: {{ p.phone }}</p>{% endif %}
-    </div>
-  {% empty %}
+<article class="authority">
+
+  {% if groups.zarzad %}
+    <section class="authority-section">
+      <h2>Zarząd Oddziału</h2>
+      <ul class="authority-list">
+        {% for p in groups.zarzad %}
+          <li class="authority-row">
+            <span class="authority-role">{{ p.get_role_display }}</span>
+            <span class="authority-sep"></span>
+            <span class="authority-name">{{ p.name }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+
+  {% if groups.sad %}
+    <section class="authority-section">
+      <h2>Sąd Koleżeński Oddziału</h2>
+      <ul class="authority-list">
+        {% for p in groups.sad %}
+          <li class="authority-row">
+            <span class="authority-role">{{ p.get_role_display }}</span>
+            <span class="authority-sep"></span>
+            <span class="authority-name">{{ p.name }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+
+  {% if groups.komisja %}
+    <section class="authority-section">
+      <h2>Komisja Rewizyjna Oddziału</h2>
+      <ul class="authority-list">
+        {% for p in groups.komisja %}
+          <li class="authority-row">
+            <span class="authority-role">{{ p.get_role_display }}</span>
+            <span class="authority-sep"></span>
+            <span class="authority-name">{{ p.name }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+
+  {% if not groups.zarzad and not groups.sad and not groups.komisja %}
     <p>Brak danych.</p>
-  {% endfor %}
-</div>
+  {% endif %}
+</article>
 
 {% endblock %}

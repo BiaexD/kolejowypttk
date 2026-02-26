@@ -53,27 +53,46 @@ class Event(TimeStamped):
 
 
 class Person(TimeStamped):
-    ROLE_CHOICES = [
-        ('prezes', 'Prezes'),
-        ('wiceprezes', 'Wiceprezes'),
-        ('sekretarz', 'Sekretarz'),
-        ('skarbnik', 'Skarbnik'),
-        ('czlonek', 'Członek zarządu'),
+    BODY_CHOICES = [
+        ("zarzad", "Zarząd Oddziału"),
+        ("sad", "Sąd Koleżeński Oddziału"),
+        ("komisja", "Komisja Rewizyjna Oddziału"),
     ]
-    name = models.CharField(max_length=120)
-    role = models.CharField(max_length=40, choices=ROLE_CHOICES, db_index=True)
+
+    ROLE_CHOICES = [
+        # Zarząd (Twoje obecne)
+        ("prezes", "Prezes"),
+        ("wiceprezes", "Wiceprezes"),
+        ("sekretarz", "Sekretarz"),
+        ("skarbnik", "Skarbnik"),
+        ("czlonek", "Członek"),
+
+        # Uniwersalne dla sądu/komisji (i też mogą się przydać w zarządzie)
+        ("przewodniczacy", "Przewodniczący"),
+        ("zastepca", "Zastępca przewodniczącego"),
+    ]
+
+    body = models.CharField(
+        max_length=20,
+        choices=BODY_CHOICES,
+        default="zarzad",
+        db_index=True,
+        verbose_name="Organ",
+    )
+    name = models.CharField(max_length=120, verbose_name="Imię i nazwisko")
+    role = models.CharField(max_length=40, choices=ROLE_CHOICES, db_index=True, verbose_name="Funkcja")
     email = models.EmailField(blank=True)
     phone = models.CharField(max_length=30, blank=True)
     photo_url = models.URLField(blank=True)
-    order = models.PositiveIntegerField(default=0)
+    order = models.PositiveIntegerField(default=0, help_text="Kolejność wyświetlania w ramach organu")
 
     class Meta:
-        ordering = ['order', 'role', 'name']
-        verbose_name = 'Osoba'
-        verbose_name_plural = 'Władze'
+        ordering = ["body", "order", "role", "name"]
+        verbose_name = "Osoba"
+        verbose_name_plural = "Władze"
 
     def __str__(self):
-        return f"{self.name} ({self.get_role_display()})"
+        return f"{self.name} ({self.get_role_display()} – {self.get_body_display()})"
 
 
 class Document(TimeStamped):

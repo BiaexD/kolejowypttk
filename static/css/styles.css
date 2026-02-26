@@ -370,3 +370,69 @@ h1,h2,h3{color:var(--pttk-dark);margin:.6rem 0}
 }
 
 .prose li{ margin: .35rem 0; }
+
+
+/* ===== WŁADZE – styl statutowy (funkcja — osoba) ===== */
+
+.authority{
+  max-width: 760px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+.authority-section{
+  margin: 1.6rem 0 2.2rem;
+}
+
+.authority-section h2{
+  font-size: 1.35rem;
+  margin: 0 0 .9rem;
+  padding-bottom: .35rem;
+  border-bottom: 2px dotted var(--rail-gray);
+  color: var(--pttk-dark);
+}
+
+/* UL bez kropek */
+.authority-list{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* każdy wiersz jak “Prezes — Jan Kowalski” */
+.authority-row{
+  display: grid;
+  grid-template-columns: 180px 24px 1fr; /* rola | — | imię i nazwisko */
+  gap: .4rem;
+  padding: .35rem 0;
+  /*border-bottom: 0px solid #f1f1f1;*/
+}
+
+.authority-role{
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  color: var(--pttk-dark);
+}
+
+.authority-sep{
+  color: #999;
+  text-align: center;
+}
+
+.authority-name{
+  font-weight: 400;
+  color: var(--ink);
+}
+
+/* mobile: rola nad nazwiskiem */
+@media (max-width: 520px){
+  .authority-row{
+    grid-template-columns: 1fr;
+  }
+  .authority-sep{ display: none; }
+  .authority-name{ padding-left: 0; }
+  .authority-role{
+    font-size: .95rem;
+  }
+}

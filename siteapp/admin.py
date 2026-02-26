@@ -12,10 +12,10 @@ class EventAdmin(admin.ModelAdmin):
 
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ('name', 'role', 'order')
-    list_editable = ('order',)
-    list_filter = ('role',)
-    search_fields = ('name',)
+    list_display = ("name", "body", "role", "order", "email", "phone")
+    list_filter = ("body", "role")
+    search_fields = ("name", "email", "phone")
+    ordering = ("body", "order", "role", "name")
 
 @admin.register(Document)
 class DocumentAdmin(admin.ModelAdmin):

@@ -29,8 +29,26 @@ def event_detail(request, slug):
     return render(request, 'events/detail.html', {'item': item, 'photos': photos})
 
 def board(request):
-    people = Person.objects.all()
-    return render(request, 'people/board.html', {'people': people})
+    people = Person.objects.all().order_by("body", "order", "role", "name")
+
+    groups = {
+        "zarzad": [],
+        "sad": [],
+        "komisja": [],
+    }
+    for p in people:
+        groups[p.body].append(p)
+
+    body_titles = dict(Person.BODY_CHOICES)
+
+    return render(
+        request,
+        "people/board.html",
+        {
+            "groups": groups,
+            "body_titles": body_titles,
+        },
+    )
 
 def docs_list(request):
     docs = Document.objects.filter(is_public=True).order_by('category','title')
