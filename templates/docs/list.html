@@ -14,7 +14,7 @@
   {% for d in docs %}
     <li>
       {% if d.category %}<strong>[{{ d.category }}]</strong>{% endif %}
-      {{ d.title }} — <a href="{% url 'document_detail' d.pk %}">Podgląd</a>
+      {{ d.title }} - <a href="{{ d.file_url }}" target="_blank" rel="noopener">Podgląd</a>
     </li>
   {% empty %}
     <li>Brak dokumentów.</li>

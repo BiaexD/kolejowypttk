@@ -54,10 +54,6 @@ def docs_list(request):
     docs = Document.objects.filter(is_public=True).order_by('category','title')
     return render(request, 'docs/list.html', {'docs': docs})
 
-def document_detail(request, pk):
-    doc = get_object_or_404(Document, pk=pk, is_public=True)
-    return render(request, 'docs/detail.html', {'doc': doc})
-
 def gallery_albums(request):
     albums = FbAlbum.objects.order_by('-updated')
     return render(request, 'gallery/albums.html', {'albums': albums})
