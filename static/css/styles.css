@@ -436,3 +436,103 @@ h1,h2,h3{color:var(--pttk-dark);margin:.6rem 0}
     font-size: .95rem;
   }
 }
+
+/* =======================
+   ODZNAKI (tylko ta strona)
+   ======================= */
+
+.odznaki-page{max-width: 920px; margin: 0 auto;}
+.odznaki-page .muted{color: var(--muted);}
+
+.odznaki-page .odznaki-actions{margin-top:.6rem;}
+.odznaki-page .btn{
+  display:inline-flex;
+  align-items:center;
+  gap:.5rem;
+  padding:.6rem .9rem;
+  border-radius:999px;
+  border:1px solid var(--rail-gray);
+  text-decoration:none;
+  color:var(--pttk-dark);
+  background:#fff;
+  font-weight:700;
+}
+.odznaki-page .btn:hover{color:var(--pttk-green); border-color:var(--pttk-green);}
+
+.odznaki-page .badge-grid{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:1rem;
+  margin:1rem 0 1.4rem;
+}
+@media (max-width: 760px){
+  .odznaki-page .badge-grid{grid-template-columns:1fr; }
+}
+
+.odznaki-page .badge-card{
+  border:1px solid #eee;
+  border-radius:16px;
+  padding:.9rem;
+  background:#fff;
+  text-align:center;
+}
+.odznaki-page .badge-card img{
+  width:min(220px, 100%);
+  height:auto;
+  display:block;
+  margin:0 auto .6rem;
+}
+
+.odznaki-page .card{
+  border:1px solid #eee;
+  border-radius:16px;
+  padding:1rem;
+  background:#fff;
+  margin:1rem 0;
+}
+.odznaki-page .card.soft{background:#fbfffb; border-color:#e6f3e6;}
+
+.odznaki-page .nice-list{margin:.6rem 0 0; padding-left:1.1rem;}
+.odznaki-page .nice-list li{margin:.35rem 0;}
+
+.odznaki-page .table-wrap{
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  border:1px solid #eee;
+  border-radius:14px;
+  background:#fff;
+}
+
+.odznaki-page .nice-table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:640px; /* na telefonie będzie scroll poziomy */
+}
+.odznaki-page .nice-table th,
+.odznaki-page .nice-table td{
+  padding:.7rem .8rem;
+  border-bottom:1px solid #eee;
+  vertical-align:top;
+}
+.odznaki-page .nice-table thead th{
+  background:#f6fff6;
+  color:var(--pttk-dark);
+  text-align:left;
+  border-bottom:1px solid #e6f3e6;
+}
+.odznaki-page .nice-table .num{
+  text-align:center;
+  font-weight:700;
+  white-space:nowrap;
+}
+.odznaki-page .nice-table tbody tr:nth-child(even){background:#fafafa;}
+.odznaki-page .nice-table tbody tr:hover{background:#f3fff3;}
+
+.odznaki-page .contact-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0,1fr));
+  gap:1rem;
+}
+@media (max-width: 760px){
+  .odznaki-page .contact-grid{grid-template-columns:1fr;}
+}

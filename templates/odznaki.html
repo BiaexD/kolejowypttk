@@ -9,7 +9,126 @@
 
 {% block content %}
 
-  <h1>Odznaki</h1>
-  <p>Strona w budowie...</p>
+<article class="prose odznaki-page">
+
+  <header class="odznaki-head">
+    <h1>Kolejowa Odznaka Turystyczna PTTK</h1>
+    <p class="muted">
+      Odznaka ma trzy stopnie: brązowy, srebrny i złoty. Zdobywa się je po kolei, maksymalnie jeden stopień rocznie.
+    </p>
+
+    <div class="odznaki-actions">
+      <a class="btn" href="/media/docs/Kolejowa_Odznaka_Turystyczna_PTTK.pdf" target="_blank" rel="noopener">
+        Otwórz regulamin (PDF)
+      </a>
+    </div>
+  </header>
+
+  <!-- 3 odznaki -->
+  <section class="badge-grid" aria-label="Stopnie odznaki">
+    <figure class="badge-card">
+      <img src="{% static 'img/odznaki/kot_braz.png' %}" alt="Kolejowa Odznaka Turystyczna PTTK — brązowa">
+      <figcaption>
+        <strong>Brązowa</strong>
+        <span class="muted">1. stopień</span>
+      </figcaption>
+    </figure>
+
+    <figure class="badge-card">
+      <img src="{% static 'img/odznaki/kot_srebro.png' %}" alt="Kolejowa Odznaka Turystyczna PTTK — srebrna">
+      <figcaption>
+        <strong>Srebrna</strong>
+        <span class="muted">2. stopień</span>
+      </figcaption>
+    </figure>
+
+    <figure class="badge-card">
+      <img src="{% static 'img/odznaki/kot_zloto.png' %}" alt="Kolejowa Odznaka Turystyczna PTTK — złota">
+      <figcaption>
+        <strong>Złota</strong>
+        <span class="muted">3. stopień</span>
+      </figcaption>
+    </figure>
+  </section>
+
+  <!-- Zasady -->
+  <section class="card soft">
+    <h2>Najważniejsze zasady</h2>
+    <ul class="nice-list">
+      <li>Odznaka ma trzy stopnie: brązowy, srebrny i złoty.</li>
+      <li>Stopnie zdobywa się po kolei.</li>
+      <li>W ciągu roku można zdobyć tylko jeden stopień.</li>
+      <li>Odznakę zdobywa się na terenie Polski.</li>
+      <li>Nie powtarza się tras i obiektów.</li>
+      <li>Dokumentację prowadzisz sam (data, trasa, obiekty, km, potwierdzenia).</li>
+    </ul>
+  </section>
+
+  <!-- Tabela -->
+  <section class="card">
+    <h2>Wymagania dla stopni</h2>
+    <p class="muted">Poniższe wymagania wynikają z <a href="/media/docs/Kolejowa_Odznaka_Turystyczna_PTTK.pdf" target="_blank" rel="noopener">
+        regulaminu</a>.
+    </p>
+
+    <div class="table-wrap" role="region" aria-label="Tabela wymagań">
+      <table class="nice-table">
+        <thead>
+          <tr>
+            <th>Wymaganie</th>
+            <th class="num">Brązowy</th>
+            <th class="num">Srebrny</th>
+            <th class="num">Złoty</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>a) wycieczki turystyczne</td><td class="num">3</td><td class="num">5</td><td class="num">7</td></tr>
+          <tr><td>b) pomnik techniki</td><td class="num">1</td><td class="num">2</td><td class="num">3</td></tr>
+          <tr><td>c) zabytkowy budynek stacyjny</td><td class="num">1</td><td class="num">2</td><td class="num">3</td></tr>
+          <tr><td>d) tablica pamiątkowa</td><td class="num">1</td><td class="num">1</td><td class="num">2</td></tr>
+          <tr><td>e) skansen lub muzeum</td><td class="num">1</td><td class="num">2</td><td class="num">3</td></tr>
+          <tr><td>f) pociąg okolicznościowy</td><td class="num">–</td><td class="num">1</td><td class="num">2</td></tr>
+          <tr><td>g) przejazd linią kolejową nie należącą do PKP*</td><td class="num">1*</td><td class="num">–</td><td class="num">–</td></tr>
+          <tr><td>h) przejazd linią wąskotorową</td><td class="num">1</td><td class="num">3</td><td class="num">4</td></tr>
+          <tr><td>i) przejazd koleją linową</td><td class="num">–</td><td class="num">1</td><td class="num">2</td></tr>
+          <tr><td>j) impreza turystyczna środowiska</td><td class="num">1</td><td class="num">2</td><td class="num">3</td></tr>
+          <tr><td>k) wystawa modeli lub taboru</td><td class="num">–</td><td class="num">1</td><td class="num">2</td></tr>
+          <tr><td>l) wycieczka linią nieistniejącą (rozebraną)</td><td class="num">–</td><td class="num">1</td><td class="num">2</td></tr>
+          <tr><td>m) wycieczka linią nieczynną</td><td class="num">1</td><td class="num">3</td><td class="num">5</td></tr>
+          <tr><td>n) przejazd z trakcją parową</td><td class="num">1</td><td class="num">2</td><td class="num">3</td></tr>
+          <tr><td>o) budowla inżynierska</td><td class="num">1</td><td class="num">2</td><td class="num">4</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="muted" style="margin-top:.7rem">
+      * Szczegóły oznaczenia „1*” są w uwagach w <a href="/media/docs/Kolejowa_Odznaka_Turystyczna_PTTK.pdf" target="_blank" rel="noopener">regulaminie</a>.
+    </p>
+  </section>
+
+  <!-- Kontakt -->
+  <section class="card soft">
+    <h2>Weryfikacja i kontakt</h2>
+    <p>Odznakę przyznaje i rozprowadza Oddział Pracowników Kolejowych PTTK w Poznaniu.</p>
+
+    <div class="contact-grid">
+      <div>
+        <h3>Adres</h3>
+        <p class="muted">
+          ul. Kolejowa 23<br>
+          60-717 Poznań
+        </p>
+      </div>
+      <div>
+        <h3>Konto bankowe</h3>
+        <p class="muted">
+          Bank Gdański – I Oddział Poznań<br>
+          Nr 306203-879-132
+        </p>
+      </div>
+    </div>
+  </section>
+
+</article>
 
 {% endblock %}
