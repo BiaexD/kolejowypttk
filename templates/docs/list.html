@@ -9,12 +9,12 @@
 
 {% block content %}
 
-<h1>Dokumenty do pobrania</h1>
+<h1>Dokumenty</h1>
 <ul>
   {% for d in docs %}
     <li>
       {% if d.category %}<strong>[{{ d.category }}]</strong>{% endif %}
-      {{ d.title }} — <a href="{{ d.file_url }}" target="_blank" rel="noopener">Pobierz</a>
+      {{ d.title }} — <a href="{% url 'document_detail' d.pk %}">Podgląd</a>
     </li>
   {% empty %}
     <li>Brak dokumentów.</li>
