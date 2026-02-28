@@ -148,3 +148,14 @@ ORG_PHONE = "+48 603 429 235"
 ORG_NIP = "7792249232"
 ORG_REGON = "634648428"
 ORG_KRS = "0000208383"
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "1") == "1"
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "kontakt@kolejowy.pttk.pl")
+CONTACT_TO_EMAIL = os.environ.get("CONTACT_TO_EMAIL", "kontakt@kolejowy.pttk.pl")

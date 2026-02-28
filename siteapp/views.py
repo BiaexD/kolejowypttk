@@ -1,6 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.contrib import messages
+from django.core.mail import EmailMessage
+from django.conf import settings
 from .models import Post, Event, Person, Document, FbAlbum, FbPhoto, HeroImage
 from .forms import ContactForm
 
@@ -67,8 +69,32 @@ def contact(request):
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
-            messages.success(request, "Dziękujemy za wiadomość!")
-            return redirect('contact')
+            name = form.cleaned_data["name"]
+            email = form.cleaned_data["email"]
+            message = form.cleaned_data["message"]
+
+            subject = f"[{settings.SITE_NAME}] Wiadomość z formularza kontaktowego"
+            body = (
+                f"Imię i nazwisko: {name}\n"
+                f"Email: {email}\n\n"
+                f"Wiadomość:\n{message}\n"
+            )
+
+            msg = EmailMessage(
+                subject=subject,
+                body=body,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[settings.CONTACT_TO_EMAIL],
+                reply_to=[email],  # mega ważne: "Odpowiedz" idzie do nadawcy
+            )
+
+            try:
+                msg.send(fail_silently=False)
+                messages.success(request, "Dziękujemy! Wiadomość została wysłana.")
+            except Exception:
+                messages.error(request, "Ups — nie udało się wysłać wiadomości. Spróbuj ponownie później.")
+
+            return redirect("contact")
     else:
         form = ContactForm()
     return render(request, 'contact.html', {'form': form})

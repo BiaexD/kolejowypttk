@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Strona główna — {{ SITE_NAME }}{% endblock %}
+{% block title %}Strona główna - {{ SITE_NAME }}{% endblock %}
 
 {% block hero %}
   {% include 'partials/hero.html' %}
@@ -10,14 +10,14 @@
 <h2>Nadchodzące wydarzenia</h2>
 <ul>
   {% for e in events %}
-    <li><a href="{{ e.get_absolute_url }}">{{ e.title }}</a> — {{ e.start_date }}{% if e.location %}, {{ e.location }}{% endif %}</li>
+    <li><a href="{{ e.get_absolute_url }}">{{ e.title }}</a> - {{ e.start_date }}{% if e.location %}, {{ e.location }}{% endif %}</li>
   {% empty %}<li>Brak nadchodzących wydarzeń.</li>{% endfor %}
 </ul>
 
 <h2>Aktualności</h2>
 <ul>
   {% for n in news %}
-    <li><a href="{{ n.get_absolute_url }}">{{ n.title|default:"Post" }}</a>{% if n.published_at %} — {{ n.published_at|date:'Y-m-d' }}{% endif %}</li>
+    <li><a href="{{ n.get_absolute_url }}">{{ n.title|default:"Post" }}</a>{% if n.published_at %} - {{ n.published_at|date:'Y-m-d' }}{% endif %}</li>
   {% empty %}<li>Brak aktualności.</li>{% endfor %}
 </ul>
 

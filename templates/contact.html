@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Kontakt — Kolejowy PTTK{% endblock %}
+{% block title %}Kontakt - {{ SITE_NAME }}{% endblock %}
 
 {% block hero %}
   {% include 'partials/hero.html' %}
@@ -9,23 +9,45 @@
 
 {% block content %}
 
-<h1>Kontakt</h1>
-<form method="post" novalidate>
-  {% csrf_token %}
-  <div>
-    <label>Imię i nazwisko</label>
-    {{ form.name }} {{ form.name.errors }}
-  </div>
-  <div>
-    <label>Email</label>
-    {{ form.email }} {{ form.email.errors }}
-  </div>
-  <div>
-    <label>Wiadomość</label>
-    {{ form.message }} {{ form.message.errors }}
-  </div>
-  <div style="display:none">{{ form.honeypot }}</div>
-  <button type="submit">Wyślij</button>
-</form>
+<article class="prose">
+  <header style="margin: 1rem 0 1.2rem;">
+    <h1>Kontakt</h1>
+    <p class="muted" style="margin-top:.25rem;">
+      Napisz do nas - odpowiemy najszybciej jak się da.
+    </p>
+  </header>
+
+  <section class="card soft">
+    <form method="post" novalidate class="contact-form">
+      {% csrf_token %}
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="{{ form.name.id_for_label }}">Imię i nazwisko</label>
+          {{ form.name }}
+          {% if form.name.errors %}<div class="field-error">{{ form.name.errors }}</div>{% endif %}
+        </div>
+
+        <div class="field">
+          <label for="{{ form.email.id_for_label }}">Email</label>
+          {{ form.email }}
+          {% if form.email.errors %}<div class="field-error">{{ form.email.errors }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="{{ form.message.id_for_label }}">Wiadomość</label>
+        {{ form.message }}
+        {% if form.message.errors %}<div class="field-error">{{ form.message.errors }}</div>{% endif %}
+      </div>
+
+      <div style="display:none">{{ form.honeypot }}</div>
+
+      <div class="form-actions">
+        <button class="btn" type="submit">Wyślij</button>
+      </div>
+    </form>
+  </section>
+</article>
 
 {% endblock %}
