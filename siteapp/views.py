@@ -6,6 +6,9 @@ from django.conf import settings
 from .models import Post, Event, Person, Document, FbAlbum, FbPhoto, HeroImage
 from .forms import ContactForm
 
+import logging
+logger = logging.getLogger(__name__)
+
 def index(request):
     news   = Post.objects.filter(is_published=True).order_by('-published_at')[:4]
     events = Event.objects.filter(is_published=True, start_date__gte=timezone.localdate()).order_by('start_date')[:3]

@@ -140,7 +140,7 @@ LOGGING = {
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 SITE_NAME = "PTTK Pracowników Kolejowych w Poznaniu "
-SITE_TAGLINE = "• Wielkopolska • turystyka • Polskie Towarzystwo Turystyki Krajowej •"
+SITE_TAGLINE = "• Wielkopolska • turystyka • Polskie Towarzystwo Turystyczno Krajoznawcze •"
 FACEBOOK_PAGE_URL = "https://www.facebook.com/profile.php?id=61581487138549"
 ORG_ADDRESS = "60-717 Poznań, ul. Kolejowa 23"
 ORG_EMAIL = "andrzej.kudlaszyk@wp.pl"
