@@ -7,13 +7,6 @@
 
 {% block content %}
 
-<h2>Nadchodzące wydarzenia</h2>
-<ul>
-  {% for e in events %}
-    <li><a href="{{ e.get_absolute_url }}">{{ e.title }}</a> - {{ e.start_date }}{% if e.location %}, {{ e.location }}{% endif %}</li>
-  {% empty %}<li>Brak nadchodzących wydarzeń.</li>{% endfor %}
-</ul>
-
 <h2>Aktualności</h2>
 <ul>
   {% for n in news %}
