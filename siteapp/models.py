@@ -28,6 +28,34 @@ class Post(TimeStamped):
     class Meta:
         ordering = ['-published_at']
 
+    def __str__(self):
+        return self.title or f"Post #{self.pk}"
+
+    def first_image(self):
+        first = self.images.order_by("order", "id").first()
+        if first:
+            return first.image.url
+        return self.image_url
+
+
+class PostImage(TimeStamped):
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name="images",
+        verbose_name="Aktualność",
+    )
+    image = models.ImageField(upload_to="news/")
+    caption = models.CharField(max_length=255, blank=True, verbose_name="Podpis")
+    order = models.PositiveIntegerField(default=0, verbose_name="Kolejność")
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "Zdjęcie aktualności"
+        verbose_name_plural = "Zdjęcia aktualności"
+
+    def __str__(self):
+        return f"Zdjęcie do: {self.post}"
 
 
 class Event(TimeStamped):
@@ -123,6 +151,7 @@ class FbAlbum(TimeStamped):
 
     def __str__(self):
         return self.name or self.fb_album_id
+
 
 class FbPhoto(TimeStamped):
     fb_photo_id = models.CharField(max_length=64, unique=True)

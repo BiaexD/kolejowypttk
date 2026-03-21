@@ -3,25 +3,23 @@ from django.utils import timezone
 from django.contrib import messages
 from django.core.mail import EmailMessage
 from django.conf import settings
-from .models import Post, Event, Person, Document, FbAlbum, FbPhoto, HeroImage
+from .models import Post, PostImage, Event, Person, Document, FbAlbum, FbPhoto, HeroImage
 from .forms import ContactForm
 
 import logging
 logger = logging.getLogger(__name__)
 
 def index(request):
-    news   = Post.objects.filter(is_published=True).order_by('-published_at')[:4]
-    events = Event.objects.filter(is_published=True, start_date__gte=timezone.localdate()).order_by('start_date')[:3]
-    albums = FbAlbum.objects.order_by('-updated')[:6]
-    hero   = HeroImage.objects.filter(is_active=True).order_by('order')[:5]
-    return render(request, 'index.html', {'news': news, 'events': events, 'albums': albums, 'hero': hero})
+    news = Post.objects.filter(is_published=True).prefetch_related('images').order_by('-published_at')[:6]
+    hero = HeroImage.objects.filter(is_active=True).order_by('order')[:5]
+    return render(request, 'index.html', {'news': news, 'hero': hero})
 
 def news_list(request):
-    items = Post.objects.filter(is_published=True).order_by('-published_at')
+    items = Post.objects.filter(is_published=True).prefetch_related('images').order_by('-published_at')
     return render(request, 'news/list.html', {'items': items})
 
 def news_detail(request, pk):
-    item = get_object_or_404(Post, pk=pk, is_published=True)
+    item = get_object_or_404(Post.objects.prefetch_related('images'), pk=pk, is_published=True)
     return render(request, 'news/detail.html', {'item': item})
 
 def event_list(request):

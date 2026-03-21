@@ -15,12 +15,12 @@ class ContactForm(forms.Form):
 class PostAdminForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['title','body','image_url','published_at','is_published','fb_perma', 'source']
+        fields = ['title', 'body', 'image_url', 'published_at', 'is_published', 'fb_perma', 'source']
 
     def clean(self):
         cleaned = super().clean()
-        title = cleaned.get('title','').strip()
-        body  = cleaned.get('body','').strip()
+        title = cleaned.get('title', '').strip()
+        body = cleaned.get('body', '').strip()
 
         if not title and not body:
             raise forms.ValidationError("Podaj przynajmniej tytuł lub treść.")

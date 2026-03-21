@@ -6,19 +6,39 @@
 {% endblock %}
 
 {% block content %}
+<h1>Aktualności</h1>
 
-<h2>Aktualności</h2>
-<ul>
-  {% for n in news %}
-    <li><a href="{{ n.get_absolute_url }}">{{ n.title|default:"Post" }}</a>{% if n.published_at %} - {{ n.published_at|date:'Y-m-d' }}{% endif %}</li>
-  {% empty %}<li>Brak aktualności.</li>{% endfor %}
-</ul>
+{% for item in news %}
+  <article class="news-card">
+    <h2>
+      <a href="{% url 'news_detail' item.pk %}">
+        {{ item.title|default:"Aktualność" }}
+      </a>
+    </h2>
 
-<h2>Ostatnie albumy</h2>
-<ul>
-  {% for a in albums %}
-    <li><a href="{% url 'gallery_album_detail' a.fb_album_id %}">{{ a.name|default:a.fb_album_id }}</a></li>
-  {% empty %}<li>Brak albumów.</li>{% endfor %}
-</ul>
+    {% with first=item.images.first %}
+      {% if first %}
+        <img src="{{ first.image.url }}" alt="{{ first.caption|default:item.title }}" loading="lazy" style="max-width:280px" />
+      {% elif item.image_url %}
+        <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy" style="max-width:280px" />
+      {% endif %}
+    {% endwith %}
 
+    <p><em>{{ item.published_at|date:'Y-m-d H:i' }}</em></p>
+    <p>{{ item.body|truncatewords:40 }}</p>
+
+    <p>
+      <a href="{% url 'news_detail' item.pk %}">Czytaj więcej</a>
+    </p>
+
+    {% if item.fb_perma %}
+      <p>
+        <a href="{{ item.fb_perma }}" target="_blank" rel="noopener">Zobacz na Facebooku</a>
+      </p>
+    {% endif %}
+  </article>
+  <hr />
+{% empty %}
+  <p>Brak aktualności.</p>
+{% endfor %}
 {% endblock %}
