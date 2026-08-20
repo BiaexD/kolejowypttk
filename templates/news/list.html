@@ -5,18 +5,18 @@
 {% block content %}
 <h1>Aktualności</h1>
 
-<section class="news-row-section">
+<section class="news-row-section" id="u-nas">
   <div class="news-row-header">
     <h2>U nas</h2>
     {% if own_page.paginator.num_pages > 1 %}
       <div class="row-nav">
         {% if own_page.has_previous %}
-          <a href="{% querystring own_page=own_page.previous_page_number %}" class="row-nav-btn" aria-label="Poprzednie">←</a>
+          <a href="{% querystring own_page=own_page.previous_page_number %}#u-nas" class="row-nav-btn" aria-label="Poprzednie">←</a>
         {% else %}
           <span class="row-nav-btn is-disabled" aria-hidden="true">←</span>
         {% endif %}
         {% if own_page.has_next %}
-          <a href="{% querystring own_page=own_page.next_page_number %}" class="row-nav-btn" aria-label="Następne">→</a>
+          <a href="{% querystring own_page=own_page.next_page_number %}#u-nas" class="row-nav-btn" aria-label="Następne">→</a>
         {% else %}
           <span class="row-nav-btn is-disabled" aria-hidden="true">→</span>
         {% endif %}
@@ -51,18 +51,18 @@
   </div>
 </section>
 
-<section class="news-row-section">
+<section class="news-row-section" id="z-centrali">
   <div class="news-row-header">
     <h2>Z centrali PTTK</h2>
     {% if central_page.paginator.num_pages > 1 %}
       <div class="row-nav">
         {% if central_page.has_previous %}
-          <a href="{% querystring central_page=central_page.previous_page_number %}" class="row-nav-btn" aria-label="Poprzednie">←</a>
+          <a href="{% querystring central_page=central_page.previous_page_number %}#z-centrali" class="row-nav-btn" aria-label="Poprzednie">←</a>
         {% else %}
           <span class="row-nav-btn is-disabled" aria-hidden="true">←</span>
         {% endif %}
         {% if central_page.has_next %}
-          <a href="{% querystring central_page=central_page.next_page_number %}" class="row-nav-btn" aria-label="Następne">→</a>
+          <a href="{% querystring central_page=central_page.next_page_number %}#z-centrali" class="row-nav-btn" aria-label="Następne">→</a>
         {% else %}
           <span class="row-nav-btn is-disabled" aria-hidden="true">→</span>
         {% endif %}

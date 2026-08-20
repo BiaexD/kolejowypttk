@@ -6,7 +6,7 @@
 
 {% block content %}
 
-<article class="prose">
+<article>
   <header style="margin: 1rem 0 1.2rem;">
     <h1>Kontakt</h1>
     <p class="muted" style="margin-top:.25rem;">
@@ -14,37 +14,54 @@
     </p>
   </header>
 
-  <section class="card soft">
-    <form method="post" novalidate class="contact-form">
-      {% csrf_token %}
+  <div class="contact-layout">
+    <section class="card soft">
+      <form method="post" novalidate class="contact-form">
+        {% csrf_token %}
 
-      <div class="form-grid">
-        <div class="field">
-          <label for="{{ form.name.id_for_label }}">Imię i nazwisko</label>
-          {{ form.name }}
-          {% if form.name.errors %}<div class="field-error">{{ form.name.errors }}</div>{% endif %}
+        <div class="form-grid">
+          <div class="field">
+            <label for="{{ form.name.id_for_label }}">Imię i nazwisko</label>
+            {{ form.name }}
+            {% if form.name.errors %}<div class="field-error">{{ form.name.errors }}</div>{% endif %}
+          </div>
+
+          <div class="field">
+            <label for="{{ form.email.id_for_label }}">Email</label>
+            {{ form.email }}
+            {% if form.email.errors %}<div class="field-error">{{ form.email.errors }}</div>{% endif %}
+          </div>
         </div>
 
         <div class="field">
-          <label for="{{ form.email.id_for_label }}">Email</label>
-          {{ form.email }}
-          {% if form.email.errors %}<div class="field-error">{{ form.email.errors }}</div>{% endif %}
+          <label for="{{ form.message.id_for_label }}">Wiadomość</label>
+          {{ form.message }}
+          {% if form.message.errors %}<div class="field-error">{{ form.message.errors }}</div>{% endif %}
         </div>
-      </div>
 
-      <div class="field">
-        <label for="{{ form.message.id_for_label }}">Wiadomość</label>
-        {{ form.message }}
-        {% if form.message.errors %}<div class="field-error">{{ form.message.errors }}</div>{% endif %}
-      </div>
+        <div style="display:none">{{ form.honeypot }}</div>
 
-      <div style="display:none">{{ form.honeypot }}</div>
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit">Wyślij</button>
+        </div>
+      </form>
+    </section>
 
-      <div class="form-actions">
-        <button class="btn" type="submit">Wyślij</button>
+    <aside class="card soft contact-info">
+      <h2>Dane kontaktowe</h2>
+      <p><strong>Adres:</strong><br>{{ ORG_ADDRESS }}</p>
+      <p><strong>Email:</strong> <a href="mailto:{{ ORG_EMAIL }}">{{ ORG_EMAIL }}</a></p>
+      <p><strong>Telefon:</strong> <a href="tel:{{ ORG_PHONE }}">{{ ORG_PHONE }}</a></p>
+      <div class="contact-map">
+        <iframe
+          src="https://www.openstreetmap.org/export/embed.html?bbox=16.9009286%2C52.3869617%2C16.9089286%2C52.3909617&layer=mapnik&marker=52.3889617%2C16.9049286"
+          loading="lazy"
+          title="Mapa dojazdu - {{ ORG_ADDRESS }}">
+        </iframe>
       </div>
-    </form>
-  </section>
+      <a href="https://www.openstreetmap.org/?mlat=52.3889617&mlon=16.9049286#map=17/52.3889617/16.9049286" target="_blank" rel="noopener" class="contact-map-link">Powiększ mapę →</a>
+    </aside>
+  </div>
 </article>
 
 {% endblock %}

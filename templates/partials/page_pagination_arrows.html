@@ -1,0 +1,14 @@
+{% if page_obj.paginator.num_pages > 1 %}
+<div class="row-nav">
+  {% if page_obj.has_previous %}
+    <a href="{% querystring page=page_obj.previous_page_number %}" class="row-nav-btn" aria-label="Poprzednia strona">←</a>
+  {% else %}
+    <span class="row-nav-btn is-disabled" aria-hidden="true">←</span>
+  {% endif %}
+  {% if page_obj.has_next %}
+    <a href="{% querystring page=page_obj.next_page_number %}" class="row-nav-btn" aria-label="Następna strona">→</a>
+  {% else %}
+    <span class="row-nav-btn is-disabled" aria-hidden="true">→</span>
+  {% endif %}
+</div>
+{% endif %}

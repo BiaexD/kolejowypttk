@@ -6,7 +6,10 @@
 
 {% block content %}
 
-<h1>Galeria</h1>
+<div class="news-row-header">
+  <h1>Galeria</h1>
+  {% include 'partials/page_pagination_arrows.html' %}
+</div>
 
 <div class="news-grid">
 {% for a in albums %}

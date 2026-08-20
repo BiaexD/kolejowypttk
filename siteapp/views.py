@@ -70,7 +70,8 @@ def gallery_albums(request):
         .distinct()
         .order_by('-start_date')
     )
-    return render(request, 'gallery/albums.html', {'albums': albums})
+    page_obj = Paginator(albums, 9).get_page(request.GET.get('page'))
+    return render(request, 'gallery/albums.html', {'albums': page_obj.object_list, 'page_obj': page_obj})
 
 def gallery_album_detail(request, slug):
     album = get_object_or_404(Event.objects.prefetch_related('photos'), slug=slug, is_published=True)

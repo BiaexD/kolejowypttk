@@ -137,6 +137,50 @@ h1,h2,h3{color:var(--pttk-dark);margin:.6rem 0}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem}
 .card{border:1px solid #eee;border-radius:14px;padding:1rem;background:#fff}
 .card img{border-radius:10px}
+.card.soft{background:#fbfffb;border-color:#e6f3e6}
+
+/* Kontakt — formularz + dane/mapa obok siebie */
+.contact-layout{
+  display:grid;
+  grid-template-columns:1.3fr 1fr;
+  gap:1.5rem;
+  align-items:start;
+}
+
+@media (max-width:900px){
+  .contact-layout{grid-template-columns:1fr}
+}
+
+.contact-info{padding:1.5rem}
+.contact-info h2{margin-top:0}
+.contact-info p{margin:0 0 .8rem}
+.contact-info a{color:var(--pttk-green); text-decoration:none}
+.contact-info a:hover{text-decoration:underline}
+
+.contact-map{
+  margin-top:1rem;
+  border-radius:12px;
+  overflow:hidden;
+  border:1px solid #e6f3e6;
+}
+
+.contact-map iframe{
+  width:100%;
+  height:260px;
+  border:0;
+  display:block;
+}
+
+.contact-map-link{
+  display:inline-block;
+  margin-top:.6rem;
+  font-size:.9rem;
+  font-weight:600;
+  color:var(--pttk-green);
+  text-decoration:none;
+}
+
+.contact-map-link:hover{text-decoration:underline}
 
 /* buttons (uniwersalne, poza hero) */
 .btn{
@@ -241,15 +285,20 @@ a.news-card:hover h2,
 a.news-card:hover h3{color:var(--pttk-green)}
 
 /* Aktualności — dwie sekcje (u nas / z centrali) w rzędach po 3 */
-.news-row-section{margin:2rem 0}
+.news-row-section{
+  margin:2rem 0;
+  scroll-margin-top:140px; /* żeby kotwica #u-nas / #z-centrali nie chowała się pod sticky headerem */
+}
 
 .news-row-header{
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:1rem;
+  flex-wrap:wrap;
 }
 
+.news-row-header h1,
 .news-row-header h2{margin:0}
 
 .row-nav{display:flex;gap:.5rem}
@@ -258,8 +307,8 @@ a.news-card:hover h3{color:var(--pttk-green)}
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  width:38px;
-  height:38px;
+  width:44px;
+  height:44px;
   border-radius:999px;
   border:1px solid var(--rail-gray);
   color:var(--pttk-dark);
@@ -605,6 +654,8 @@ a.news-card:hover h3{color:var(--pttk-green)}
   }
 
   .hero-banner-content{padding:2rem 1.25rem}
+
+  .news-row-section{scroll-margin-top:90px}
 }
 
 /* ładna typografia długich tekstów */
