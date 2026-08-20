@@ -7,22 +7,24 @@
   <title>{% block title %}{{ SITE_NAME }}{% endblock %}</title>
   <meta name="description" content="{{ SITE_TAGLINE }}">
   <link rel="icon" href="{% static 'img/logo1.jpg' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
 
-<header class="container header">
-  <a class="brand" href="/">
-    <img src="{% static 'img/logo1.jpg' %}" alt="{{ SITE_NAME }}" class="brand-logo">
-    <span class="brand-text">
-      {{ SITE_NAME }}<br>
-      <small>{{ SITE_TAGLINE }}</small>
-    </span>
-  </a>
+<header class="site-header">
+  <div class="container topbar">
+    <a class="brand" href="{% url 'index' %}">
+      <img src="{% static 'img/logo1.jpg' %}" alt="{{ SITE_NAME }}" class="brand-logo">
+      <span class="brand-text">
+        {{ SITE_NAME }}
+        <small>{{ SITE_TAGLINE }}</small>
+      </span>
+    </a>
 
-    <nav class="nav">
-      <a href="/wladze/">Władze</a>
-      <a href="/kontakt/">Kontakt</a>
+    <div class="topbar-actions">
       {% if FACEBOOK_PAGE_URL %}
       <a href="{{ FACEBOOK_PAGE_URL }}" target="_blank" rel="noopener" class="fb-icon" aria-label="Facebook">
         <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
@@ -34,21 +36,27 @@
         </svg>
       </a>
       {% endif %}
-            <button class="mobile-toggle"
+      <button class="mobile-toggle"
         type="button"
         aria-label="Menu"
         aria-expanded="false"
-        aria-controls="mobile-menu">
+        aria-controls="site-nav">
         ☰
       </button>
-    </nav>
-  <nav id="mobile-menu" class="mobile-menu" aria-label="Menu mobilne">
-    <a href="/historia/">Historia</a>
-    <a href="/odznaki/">Odznaki</a>
-    <a href="/aktualnosci/">Aktualności</a>
-    <a href="/wydarzenia/">Wydarzenia</a>
-    <a href="/galeria/">Galeria</a>
-    <a href="/dokumenty/">Dokumenty</a>
+    </div>
+  </div>
+
+  <nav id="site-nav" class="site-nav" aria-label="Menu główne">
+    <div class="container site-nav-inner">
+      <a href="{% url 'news_list' %}" {% if request.resolver_match.url_name == 'news_list' or request.resolver_match.url_name == 'news_detail' %}class="is-active"{% endif %}>Aktualności</a>
+      <a href="{% url 'event_list' %}" {% if request.resolver_match.url_name == 'event_list' or request.resolver_match.url_name == 'event_detail' %}class="is-active"{% endif %}>Wydarzenia</a>
+      <a href="{% url 'historia' %}" {% if request.resolver_match.url_name == 'historia' %}class="is-active"{% endif %}>Historia</a>
+      <a href="{% url 'odznaki' %}" {% if request.resolver_match.url_name == 'odznaki' %}class="is-active"{% endif %}>Odznaki</a>
+      <a href="{% url 'board' %}" {% if request.resolver_match.url_name == 'board' %}class="is-active"{% endif %}>Władze</a>
+      <a href="{% url 'gallery_albums' %}" {% if request.resolver_match.url_name == 'gallery_albums' or request.resolver_match.url_name == 'gallery_album_detail' %}class="is-active"{% endif %}>Galeria</a>
+      <a href="{% url 'docs_list' %}" {% if request.resolver_match.url_name == 'docs_list' %}class="is-active"{% endif %}>Dokumenty</a>
+      <a href="{% url 'contact' %}" {% if request.resolver_match.url_name == 'contact' %}class="is-active"{% endif %}>Kontakt</a>
+    </div>
   </nav>
 </header>
 
@@ -90,12 +98,10 @@
   <p class="copyright">© {% now "Y" %} {{ SITE_NAME }}</p>
 </footer>
 
-<script src="{% static 'js/hero-slider.js' %}"></script>
-
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const btn = document.querySelector('.mobile-toggle');
-    const menu = document.getElementById('mobile-menu');
+    const menu = document.getElementById('site-nav');
 
     if (!btn || !menu) return;
 

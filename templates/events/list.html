@@ -3,24 +3,30 @@
 
 {% block title %}Wydarzenia - Kolejowy PTTK{% endblock %}
 
-{% block hero %}
-  {% include 'partials/hero.html' %}
-{% endblock %}
 
 {% block content %}
 
 <h1>Wydarzenia</h1>
-<ul>
+
+<div class="event-list">
 {% for e in items %}
-  <li>
-    <a href="{{ e.get_absolute_url }}">{{ e.title }}</a>
-    — {{ e.start_date }}{% if e.end_date %} – {{ e.end_date }}{% endif %}
-    {% if e.location %} — {{ e.location }}{% endif %}
-  </li>
+  <a href="{{ e.get_absolute_url }}" class="event-row">
+    <div class="event-date">
+      <span class="event-day">{{ e.start_date|date:'d' }}</span>
+      <span class="event-month">{{ e.start_date|date:'M' }}</span>
+    </div>
+    <div class="event-info">
+      <h2>{{ e.title }}</h2>
+      <p class="event-meta">
+        {{ e.start_date|date:'d.m.Y' }}{% if e.end_date %} – {{ e.end_date|date:'d.m.Y' }}{% endif %}
+        {% if e.location %} • {{ e.location }}{% endif %}
+      </p>
+    </div>
+  </a>
 {% empty %}
-  <li>Brak wydarzeń.</li>
+  <p>Brak wydarzeń.</p>
 {% endfor %}
-</ul>
+</div>
 
 {% include 'partials/pagination.html' %}
 {% endblock %}

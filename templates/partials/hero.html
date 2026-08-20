@@ -1,35 +1,14 @@
 {% load static %}
-<section class="hero-slider" data-interval="5000">
-
-  {# SLIDES: pokażemy tylko na desktop, na mobile ukryjemy #}
-  <div class="hero-slides">
-    {% for h in hero %}
-      <div class="slide{% if forloop.first %} is-active{% endif %}"
-           style="--bg:url('{% static h.image_url %}')">
-        <div class="hero-overlay"></div>
-      </div>
-    {% empty %}
-      <div class="slide is-active" style="--bg:url('{% static 'img/og-default.jpg' %}')">
-        <div class="hero-overlay"></div>
-      </div>
-    {% endfor %}
-
-    <div class="hero-dots">
-      {% for _ in hero %}
-        <button class="dot{% if forloop.first %} is-active{% endif %}"></button>
-      {% endfor %}
+{% with h=hero.0 %}
+<section class="hero-banner" style="--bg:url('{% if h %}{% static h.image_url %}{% else %}{% static 'img/hero1.jpg' %}{% endif %}')">
+  <div class="hero-banner-overlay"></div>
+  <div class="hero-banner-content container">
+    <h1>{{ SITE_NAME }}</h1>
+    <p class="hero-tagline">{{ SITE_TAGLINE }}</p>
+    <div class="hero-cta">
+      <a href="{% url 'news_list' %}" class="btn btn-hero-primary">Aktualności</a>
+      <a href="{% url 'contact' %}" class="btn btn-hero-outline">Dołącz do nas</a>
     </div>
   </div>
-
-  {# MENU: zawsze widoczne (desktop i mobile) #}
-  <nav class="hero-side">
-    <a href="/historia/">Historia</a>
-    <a href="/odznaki/">Odznaki</a>
-    <a href="/aktualnosci/">Aktualności</a>
-    <a href="/wydarzenia/">Wydarzenia</a>
-    <a href="/galeria/">Galeria</a>
-    <a href="/dokumenty/">Dokumenty</a>
-  </nav>
-
 </section>
-
+{% endwith %}

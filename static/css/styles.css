@@ -10,7 +10,7 @@
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   color:var(--ink);
   background:var(--paper);
   line-height:1.55;
@@ -20,88 +20,107 @@ img{max-width:100%;height:auto}
 h1,h2,h3{color:var(--pttk-dark);margin:.6rem 0}
 
 /* layout */
-.container{max-width:1000px;margin:0 auto;padding:0 1rem}
+.container{max-width:1100px;margin:0 auto;padding:0 1.25rem}
 
-.header{
+.site-header{
+  position:sticky;
+  top:0;
+  z-index:50;
+  background:var(--paper);
+  box-shadow:0 1px 0 rgba(0,0,0,.06);
+}
+
+.topbar{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding:1rem 0;
-  position:relative;
-}
-
-/* delikatny separator POD przyciskami w headerze */
-.header::before{
-  content:"";
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:-6px;
-  border-top:4px dotted var(--rail-gray);
-  opacity:.6;
+  padding:.9rem 0;
 }
 
 /* brand */
 .brand{
   display:flex;
   align-items:center;
+  gap:.7rem;
   text-decoration:none;
   color:var(--pttk-dark);
 }
 
 .brand-logo{
-  width:100px;
+  width:56px;
   height:auto;
-  margin-right:.6rem;
+  border-radius:8px;
 }
 
 .brand-text{
+  display:flex;
+  flex-direction:column;
   font-weight:700;
-  font-size:1.8rem;
-  line-height:1.2;
+  font-size:1.25rem;
+  line-height:1.25;
 }
 
 .brand-text small{
   font-weight:500;
   color:var(--muted);
-  font-size:1rem;
+  font-size:.85rem;
 }
 
-/* NAVIGATION (desktop) */
-.nav{
+.topbar-actions{
   display:flex;
   align-items:center;
-  gap:0; /* separatory robią border-left na linkach */
+  gap:1rem;
 }
 
-.nav a{
-  position:relative;
-  display:inline-flex;
-  align-items:center;
-  padding:0 .9rem;
-  text-decoration:none;
-  color:var(--pttk-dark);
-  border-left:2px solid var(--muted);
-  white-space:nowrap;
-}
-
-.nav a:first-child{border-left:none}
-.nav a:hover{color:var(--pttk-green)}
-
-/* Ikona FB w top-nav */
-.nav .fb-icon{
+/* Ikona FB w topbarze */
+.fb-icon{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  margin-left:.9rem;
 }
 
-.nav .fb-icon svg{
+.fb-icon svg{
   fill:#1877f2;
   transition:fill .2s ease;
 }
 
-.nav .fb-icon:hover svg{fill:#145dbf}
+.fb-icon:hover svg{fill:#145dbf}
+
+/* NAVIGATION (pasek pod topbarem, ta sama lista linków na desktop i mobile) */
+.site-nav{
+  border-top:1px solid var(--rail-gray);
+  background:var(--pttk-dark);
+}
+
+.site-nav-inner{
+  display:flex;
+  align-items:center;
+  gap:1.75rem;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+
+.site-nav-inner::-webkit-scrollbar{display:none}
+
+.site-nav a{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  padding:.85rem 0;
+  text-decoration:none;
+  color:#e8efe9;
+  font-weight:600;
+  font-size:.95rem;
+  white-space:nowrap;
+  border-bottom:3px solid transparent;
+}
+
+.site-nav a:hover{color:#fff}
+
+.site-nav a.is-active{
+  color:#fff;
+  border-bottom-color:var(--pttk-green);
+}
 
 /* fb link badge (jeśli używasz gdzieś poza nav) */
 .fb-link a{
@@ -118,6 +137,161 @@ h1,h2,h3{color:var(--pttk-dark);margin:.6rem 0}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem}
 .card{border:1px solid #eee;border-radius:14px;padding:1rem;background:#fff}
 .card img{border-radius:10px}
+
+/* buttons (uniwersalne, poza hero) */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:.4rem;
+  padding:.65rem 1.3rem;
+  border-radius:999px;
+  font-weight:700;
+  text-decoration:none;
+  border:1px solid var(--rail-gray);
+  color:var(--pttk-dark);
+  background:#fff;
+}
+.btn:hover{border-color:var(--pttk-green); color:var(--pttk-green)}
+
+.btn-primary{
+  background:var(--pttk-green);
+  border-color:var(--pttk-green);
+  color:#fff;
+}
+.btn-primary:hover{background:#166a34; color:#fff}
+
+/* Aktualności — siatka kart */
+.news-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:1.5rem;
+  margin:1.5rem 0;
+}
+
+.news-card{
+  display:flex;
+  flex-direction:column;
+  border:1px solid #eee;
+  border-radius:16px;
+  overflow:hidden;
+  background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+  transition:box-shadow .2s ease, transform .2s ease;
+}
+
+.news-card:hover{
+  box-shadow:0 10px 26px rgba(0,0,0,.09);
+  transform:translateY(-2px);
+}
+
+.news-card-media{
+  display:block;
+  aspect-ratio:16/10;
+  background:#eef4ee;
+  overflow:hidden;
+}
+
+.news-card-media img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.news-card-media-placeholder{
+  width:100%;
+  height:100%;
+  background:linear-gradient(135deg,#e8f3ea,#d9ece0);
+}
+
+.news-card-body{
+  padding:1.1rem 1.2rem 1.3rem;
+  display:flex;
+  flex-direction:column;
+  gap:.4rem;
+  flex:1;
+}
+
+.news-card-date{
+  color:var(--muted);
+  font-size:.82rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.03em;
+}
+
+.news-card-body h2{
+  margin:0;
+  font-size:1.15rem;
+}
+
+.news-card-body h2 a{
+  color:var(--pttk-dark);
+  text-decoration:none;
+}
+
+.news-card-body h2 a:hover{color:var(--pttk-green)}
+
+.news-card-body p{
+  margin:0;
+  color:var(--ink);
+  font-size:.95rem;
+}
+
+.news-card-more{
+  margin-top:auto;
+  padding-top:.5rem;
+  color:var(--pttk-green);
+  font-weight:700;
+  text-decoration:none;
+  font-size:.92rem;
+}
+
+.news-card-more:hover{text-decoration:underline}
+
+/* Wydarzenia — lista wierszy */
+.event-list{
+  display:flex;
+  flex-direction:column;
+  gap:.9rem;
+  margin:1.5rem 0;
+}
+
+.event-row{
+  display:flex;
+  gap:1.1rem;
+  align-items:center;
+  padding:1rem 1.2rem;
+  border:1px solid #eee;
+  border-radius:14px;
+  text-decoration:none;
+  color:inherit;
+  background:#fff;
+  transition:box-shadow .2s ease, border-color .2s ease;
+}
+
+.event-row:hover{
+  border-color:var(--pttk-green);
+  box-shadow:0 6px 18px rgba(0,0,0,.06);
+}
+
+.event-date{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-width:64px;
+  padding:.5rem;
+  border-radius:10px;
+  background:#f6fff6;
+  color:var(--pttk-dark);
+}
+
+.event-day{font-size:1.4rem;font-weight:800;line-height:1}
+.event-month{font-size:.75rem;text-transform:uppercase;font-weight:700;color:var(--pttk-green)}
+
+.event-info h2{margin:0 0 .25rem;font-size:1.1rem;color:var(--pttk-dark)}
+.event-meta{margin:0;color:var(--muted);font-size:.9rem}
 
 /* messages */
 .messages{list-style:none;margin:0;padding:0}
@@ -159,174 +333,94 @@ h1,h2,h3{color:var(--pttk-dark);margin:.6rem 0}
 /* helpers */
 .lead{font-weight:600}
 
-/* HERO slider (desktop) */
-.hero-slider{
+/* HERO banner (strona główna) */
+.hero-banner{
   position:relative;
-  width:100vw;
-  left:50%;
-  right:50%;
-  margin-left:-50vw;
-  margin-right:-50vw;
-
-  height:min(60vh, 600px);
-  max-height:500px;
-  overflow:hidden;
-  border-radius:0;
-}
-
-/* wrapper na slajdy */
-.hero-slides{
-  position:absolute;
-  inset:0;
-}
-
-.hero-slider .slide{
-  position:absolute;
-  inset:0;
+  width:100%;
+  min-height:min(56vh, 560px);
+  display:flex;
+  align-items:center;
   background-image:var(--bg);
   background-size:cover;
   background-position:center;
-  opacity:0;
-  transition:opacity 800ms ease-in-out;
 }
 
-.hero-slider .slide.is-active{opacity:1}
-
-.hero-slider .slide{z-index:0}
-.hero-slider .hero-overlay{z-index:1}
-.hero-side,.hero-dots{z-index:3}
-
-.hero-slider .hero-overlay{
+.hero-banner-overlay{
   position:absolute;
   inset:0;
-  background:linear-gradient(0deg, rgba(0,0,0,.35), rgba(0,0,0,.15));
-  box-shadow:inset 0 0 60px rgba(0,0,0,.5);
-  pointer-events:none;
+  background:linear-gradient(160deg, rgba(15,30,20,.82), rgba(15,30,20,.45) 60%, rgba(15,30,20,.7));
 }
 
-/* boczne przyciski (desktop) */
-.hero-side{
-  position:absolute;
-  left:1rem;
-  top:50%;
-  transform:translateY(-50%);
-  display:flex;
-  flex-direction:column;
-  gap:.6rem;
-}
-
-.hero-side a{
-  display:block;
-  padding:.6rem .9rem;
-  min-width:180px;
-  background:rgba(28,124,61,.9);
+.hero-banner-content{
+  position:relative;
+  z-index:1;
   color:#fff;
-  text-decoration:none;
-  border-radius:10px;
-  font-weight:600;
-  box-shadow:0 4px 10px rgba(0,0,0,.15);
-  border:1px solid rgba(255,255,255,.15);
+  padding:3rem 1.25rem;
 }
 
-.hero-side a:hover{background:rgba(28,124,61,1)}
+.hero-banner-content h1{
+  color:#fff;
+  font-size:clamp(1.8rem, 4vw, 2.8rem);
+  margin:0 0 .5rem;
+}
 
-/* kropki */
-.hero-dots{
-  position:absolute;
-  bottom:10px;
-  left:0;
-  right:0;
+.hero-tagline{
+  font-size:1.1rem;
+  color:#e8efe9;
+  margin:0 0 1.6rem;
+  max-width:52ch;
+}
+
+.hero-cta{
   display:flex;
-  justify-content:center;
-  gap:.5rem;
+  flex-wrap:wrap;
+  gap:.9rem;
 }
 
-.hero-dots .dot{
-  width:10px;
-  height:10px;
-  border-radius:50%;
-  border:none;
-  cursor:pointer;
-  background:rgba(255,255,255,.6);
+.btn-hero-primary,
+.btn-hero-outline{
+  display:inline-flex;
+  align-items:center;
+  padding:.75rem 1.4rem;
+  border-radius:999px;
+  font-weight:700;
+  text-decoration:none;
 }
 
-.hero-dots .dot.is-active{background:#fff}
+.btn-hero-primary{
+  background:var(--pttk-green);
+  color:#fff;
+  box-shadow:0 4px 14px rgba(0,0,0,.25);
+}
+
+.btn-hero-primary:hover{background:#166a34}
+
+.btn-hero-outline{
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  border:1px solid rgba(255,255,255,.6);
+}
+
+.btn-hero-outline:hover{background:rgba(255,255,255,.18)}
 
 /* --- MOBILE MENU (hamburger) --- */
 .mobile-toggle{
   display:none; /* desktop: ukryty */
 }
 
-.mobile-menu{
-  display:none; /* domyślnie zamknięte */
-  background:#fff;
-  border-top:1px dotted var(--rail-gray);
-  border-bottom:1px dotted var(--rail-gray);
-  padding:.4rem 0;
-}
-
-.mobile-menu a{
-  display:block;
-  padding:.7rem 1rem;
-  text-decoration:none;
-  color:var(--pttk-dark);
-  font-weight:600;
-}
-
-.mobile-menu a:hover{background:#f6fff6}
-
-.mobile-menu.is-open{display:block}
-
 /* =========================
-   MOBILE (<=700px) – JEDNA, SPÓJNA WERSJA
+   MOBILE (<=760px)
    ========================= */
-@media (max-width:700px){
+@media (max-width:760px){
 
-  /* header układ: brand na górze, nav w jednym wierszu pod spodem */
-  .header{
-    flex-direction:column;
-    align-items:stretch;
-    gap:.4rem;
-    padding-bottom:.4rem;
-  }
+  .brand-logo{width:44px}
+  .brand-text{font-size:1.05rem}
+  .brand-text small{font-size:.78rem}
 
-  .brand{width:100%}
-
-  .brand-logo{width:64px;margin-right:.6rem}
-
-  .brand-text{
-    font-size:1.25rem;
-    line-height:1.15;
-  }
-
-  .brand-text small{font-size:.9rem}
-
-  /* nav: trzymamy w 1 wierszu */
-  .nav{
-    width:100%;
-    display:flex;
-    align-items:center;
-    gap:.6rem;
-    flex-wrap:nowrap;        /* klucz: nie łamie na 2 linie */
-  }
-
-  .nav a{
-    padding:.35rem .4rem;
-    font-size:.95rem;
-    border-left:none;        /* na mobile separatory tylko psują */
-  }
-
-  /* FB wypychamy na prawo */
-  .nav .fb-icon{
-    margin-left:auto;
-  }
-
-  /* hamburger na sam koniec (WAŻNE: w HTML też najlepiej daj go na końcu nav) */
   .mobile-toggle{
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    margin-left:.3rem;       /* nie auto, bo to robiło “rozjechanie” */
     padding:.35rem .6rem;
     font-size:1.25rem;
     border:1px solid var(--rail-gray);
@@ -335,14 +429,35 @@ h1,h2,h3{color:var(--pttk-dark);margin:.6rem 0}
     cursor:pointer;
   }
 
-  /* hero: na mobile wyłączamy dodatkowe menu przy sliderze */
-  .hero-side{display:none !important;}
-
-  /* hero slider: zostawiamy, ale jeśli chcesz go skracać na mobile – możesz tu zmienić wysokość */
-  .hero-slider{
-    height:min(45vh, 420px);
-    max-height:420px;
+  .site-nav{
+    display:none;
   }
+
+  .site-nav.is-open{
+    display:block;
+  }
+
+  .site-nav-inner{
+    flex-direction:column;
+    align-items:stretch;
+    gap:0;
+    overflow:visible;
+  }
+
+  .site-nav a{
+    padding:.9rem 0;
+    border-bottom:1px solid rgba(255,255,255,.1);
+  }
+
+  .site-nav a.is-active{
+    border-bottom-color:var(--pttk-green);
+  }
+
+  .hero-banner{
+    min-height:min(46vh, 420px);
+  }
+
+  .hero-banner-content{padding:2rem 1.25rem}
 }
 
 /* ładna typografia długich tekstów */

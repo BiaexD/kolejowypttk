@@ -1,37 +1,35 @@
 {% extends 'base.html' %}
 {% block title %}Aktualności - {{ SITE_NAME }}{% endblock %}
 
-{% block hero %}
-  {% include 'partials/hero.html' %}
-{% endblock %}
 
 {% block content %}
 <h1>Aktualności</h1>
 
+<div class="news-grid">
 {% for item in items %}
   <article class="news-card">
-    <h2>
-      <a href="{% url 'news_detail' item.pk %}">
-        {{ item.title|default:"Aktualność" }}
-      </a>
-    </h2>
-
-    {% with first=item.images.first %}
-      {% if first %}
-        <img src="{{ first.image.url }}" alt="{{ first.caption|default:item.title }}" loading="lazy" style="max-width:280px" />
-      {% elif item.image_url %}
-        <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy" style="max-width:280px" />
-      {% endif %}
-    {% endwith %}
-
-    <p><em>{{ item.published_at|date:'Y-m-d H:i' }}</em></p>
-    <p>{{ item.body|truncatewords:40 }}</p>
-    <p><a href="{% url 'news_detail' item.pk %}">Czytaj więcej</a></p>
+    <a href="{% url 'news_detail' item.pk %}" class="news-card-media">
+      {% with first=item.images.first %}
+        {% if first %}
+          <img src="{{ first.image.url }}" alt="{{ first.caption|default:item.title }}" loading="lazy">
+        {% elif item.image_url %}
+          <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy">
+        {% else %}
+          <div class="news-card-media-placeholder"></div>
+        {% endif %}
+      {% endwith %}
+    </a>
+    <div class="news-card-body">
+      <time class="news-card-date">{{ item.published_at|date:'d.m.Y' }}</time>
+      <h2><a href="{% url 'news_detail' item.pk %}">{{ item.title|default:"Aktualność" }}</a></h2>
+      <p>{{ item.body|truncatewords:24 }}</p>
+      <a class="news-card-more" href="{% url 'news_detail' item.pk %}">Czytaj więcej →</a>
+    </div>
   </article>
-  <hr />
 {% empty %}
   <p>Brak aktualności.</p>
 {% endfor %}
+</div>
 
 {% include 'partials/pagination.html' %}
 {% endblock %}
