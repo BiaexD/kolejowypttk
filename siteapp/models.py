@@ -172,7 +172,7 @@ class FbPhoto(TimeStamped):
 
 
 class HeroImage(TimeStamped):
-    image_url = models.CharField()
+    image_url = models.CharField(max_length=255, help_text="Ścieżka względna w static/, np. img/hero1.jpg")
     title = models.CharField(max_length=140, blank=True)
     is_active = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
