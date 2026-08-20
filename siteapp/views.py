@@ -5,7 +5,7 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.http import HttpResponse
-from .models import Post, PostImage, Event, Person, Document, FbAlbum, FbPhoto, HeroImage
+from .models import Post, PostImage, Event, Person, Document, HeroImage, CentralNews
 from .forms import ContactForm
 
 import logging
@@ -17,9 +17,13 @@ def index(request):
     return render(request, 'index.html', {'news': news, 'hero': hero})
 
 def news_list(request):
-    items = Post.objects.filter(is_published=True).prefetch_related('images').order_by('-published_at')
-    page_obj = Paginator(items, 10).get_page(request.GET.get('page'))
-    return render(request, 'news/list.html', {'items': page_obj.object_list, 'page_obj': page_obj})
+    own_items = Post.objects.filter(is_published=True).prefetch_related('images').order_by('-published_at')
+    own_page = Paginator(own_items, 3).get_page(request.GET.get('own_page'))
+
+    central_items = CentralNews.objects.all()
+    central_page = Paginator(central_items, 3).get_page(request.GET.get('central_page'))
+
+    return render(request, 'news/list.html', {'own_page': own_page, 'central_page': central_page})
 
 def news_detail(request, pk):
     item = get_object_or_404(Post.objects.prefetch_related('images'), pk=pk, is_published=True)
@@ -31,9 +35,8 @@ def event_list(request):
     return render(request, 'events/list.html', {'items': page_obj.object_list, 'page_obj': page_obj})
 
 def event_detail(request, slug):
-    item = get_object_or_404(Event, slug=slug, is_published=True)
-    photos = FbPhoto.objects.filter(album__isnull=False)[:0]
-    return render(request, 'events/detail.html', {'item': item, 'photos': photos})
+    item = get_object_or_404(Event.objects.prefetch_related('photos'), slug=slug, is_published=True)
+    return render(request, 'events/detail.html', {'item': item})
 
 def board(request):
     people = Person.objects.all().order_by("body", "order", "role", "name")
@@ -62,12 +65,16 @@ def docs_list(request):
     return render(request, 'docs/list.html', {'docs': docs})
 
 def gallery_albums(request):
-    albums = FbAlbum.objects.order_by('-updated')
+    albums = (
+        Event.objects.filter(is_published=True, photos__isnull=False)
+        .distinct()
+        .order_by('-start_date')
+    )
     return render(request, 'gallery/albums.html', {'albums': albums})
 
-def gallery_album_detail(request, album_id):
-    album = get_object_or_404(FbAlbum, fb_album_id=album_id)
-    photos = FbPhoto.objects.filter(album=album).order_by('-created_time')
+def gallery_album_detail(request, slug):
+    album = get_object_or_404(Event.objects.prefetch_related('photos'), slug=slug, is_published=True)
+    photos = album.photos.all()
     return render(request, 'gallery/album_detail.html', {'album': album, 'photos': photos})
 
 def contact(request):

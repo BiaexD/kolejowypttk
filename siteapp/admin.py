@@ -1,6 +1,12 @@
 from django.contrib import admin
-from .models import Post, PostImage, Event, Person, Document, FbAlbum, FbPhoto, HeroImage
+from .models import Post, PostImage, Event, EventPhoto, Person, Document, HeroImage, CentralNews
 from .forms import PostAdminForm
+
+
+class EventPhotoInline(admin.TabularInline):
+    model = EventPhoto
+    extra = 3
+    fields = ('image', 'caption', 'order')
 
 
 @admin.register(Event)
@@ -9,6 +15,7 @@ class EventAdmin(admin.ModelAdmin):
     list_filter = ('is_published', 'start_date')
     search_fields = ('title', 'description', 'location')
     prepopulated_fields = {'slug': ('title',)}
+    inlines = [EventPhotoInline]
 
 
 @admin.register(Person)
@@ -25,21 +32,6 @@ class DocumentAdmin(admin.ModelAdmin):
     list_filter = ('is_public', 'category')
     search_fields = ('title', 'category')
     ordering = ('category', 'title')
-
-
-@admin.register(FbAlbum)
-class FbAlbumAdmin(admin.ModelAdmin):
-    list_display = ('name', 'fb_album_id', 'count', 'updated')
-    search_fields = ('name', 'fb_album_id')
-    ordering = ('-updated',)
-
-
-@admin.register(FbPhoto)
-class FbPhotoAdmin(admin.ModelAdmin):
-    list_display = ('fb_photo_id', 'album', 'created_time')
-    search_fields = ('fb_photo_id', 'caption')
-    list_filter = ('album',)
-    ordering = ('-created_time',)
 
 
 class PostImageInline(admin.TabularInline):
@@ -62,6 +54,13 @@ class PostAdmin(admin.ModelAdmin):
         ('Źródła (opcjonalne)', {'fields': ('fb_perma', 'source')}),
     )
     exclude = ('fb_post_id',)
+
+
+@admin.register(CentralNews)
+class CentralNewsAdmin(admin.ModelAdmin):
+    list_display = ('title', 'published_at')
+    search_fields = ('title', 'excerpt')
+    ordering = ('-published_at',)
 
 
 @admin.register(HeroImage)

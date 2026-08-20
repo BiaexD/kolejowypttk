@@ -7,15 +7,25 @@
 {% block content %}
 
 <h1>Dokumenty</h1>
-<ul>
-  {% for d in docs %}
-    <li>
-      {% if d.category %}<strong>[{{ d.category }}]</strong>{% endif %}
-      {{ d.title }} - <a href="{{ d.file_url }}" target="_blank" rel="noopener">Podgląd</a>
-    </li>
-  {% empty %}
-    <li>Brak dokumentów.</li>
-  {% endfor %}
-</ul>
+
+<div class="doc-list">
+{% for d in docs %}
+  <a href="{{ d.file_url }}" target="_blank" rel="noopener" class="doc-row">
+    <span class="doc-icon" aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M14 2v6h6" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+      </svg>
+    </span>
+    <span class="doc-info">
+      <span class="doc-title">{{ d.title }}</span>
+      {% if d.category %}<span class="doc-category">{{ d.category }}</span>{% endif %}
+    </span>
+    <span class="doc-action">Podgląd →</span>
+  </a>
+{% empty %}
+  <p>Brak dokumentów.</p>
+{% endfor %}
+</div>
 
 {% endblock %}

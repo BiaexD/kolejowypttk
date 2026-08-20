@@ -1,6 +1,8 @@
 from django.db import models
 from django.urls import reverse
 
+from .imaging import resize_and_compress
+
 
 class TimeStamped(models.Model):
     created = models.DateTimeField(auto_now_add=True)
@@ -79,6 +81,37 @@ class Event(TimeStamped):
     def get_absolute_url(self):
         return reverse('event_detail', args=[self.slug])
 
+    def cover_photo(self):
+        first = self.photos.order_by("order", "id").first()
+        return first.image.url if first else self.cover_url
+
+
+class EventPhoto(TimeStamped):
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name="photos",
+        verbose_name="Wydarzenie",
+    )
+    image = models.ImageField(upload_to="gallery/")
+    caption = models.CharField(max_length=255, blank=True, verbose_name="Podpis")
+    order = models.PositiveIntegerField(default=0, verbose_name="Kolejność")
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "Zdjęcie z wydarzenia"
+        verbose_name_plural = "Zdjęcia z wydarzeń"
+
+    def __str__(self):
+        return f"Zdjęcie: {self.event}"
+
+    def save(self, *args, **kwargs):
+        is_new_upload = bool(self.image) and not self.image._committed
+        super().save(*args, **kwargs)
+        if is_new_upload:
+            resize_and_compress(self.image)
+            EventPhoto.objects.filter(pk=self.pk).update(image=self.image.name)
+
 
 class Person(TimeStamped):
     BODY_CHOICES = [
@@ -123,6 +156,24 @@ class Person(TimeStamped):
         return f"{self.name} ({self.get_role_display()} – {self.get_body_display()})"
 
 
+class CentralNews(TimeStamped):
+    """Aktualność zaimportowana z pttk.pl (centrala), przez WP REST API."""
+    wp_id = models.PositiveIntegerField(unique=True)
+    title = models.CharField(max_length=300)
+    excerpt = models.TextField(blank=True)
+    link = models.URLField()
+    image_url = models.URLField(blank=True)
+    published_at = models.DateTimeField(db_index=True)
+
+    class Meta:
+        ordering = ['-published_at']
+        verbose_name = 'Aktualność z centrali PTTK'
+        verbose_name_plural = 'Aktualności z centrali PTTK'
+
+    def __str__(self):
+        return self.title
+
+
 class Document(TimeStamped):
     title = models.CharField(max_length=200)
     category = models.CharField(max_length=120, blank=True)
@@ -136,39 +187,6 @@ class Document(TimeStamped):
 
     def __str__(self):
         return self.title
-
-
-class FbAlbum(TimeStamped):
-    fb_album_id = models.CharField(max_length=64, unique=True)
-    name = models.CharField(max_length=200, blank=True)
-    count = models.PositiveIntegerField(default=0)
-    cover_photo_id = models.CharField(max_length=64, blank=True)
-
-    class Meta:
-        ordering = ['-updated']
-        verbose_name = 'Album FB'
-        verbose_name_plural = 'Albumy FB'
-
-    def __str__(self):
-        return self.name or self.fb_album_id
-
-
-class FbPhoto(TimeStamped):
-    fb_photo_id = models.CharField(max_length=64, unique=True)
-    album = models.ForeignKey(FbAlbum, null=True, blank=True, on_delete=models.SET_NULL)
-    created_time = models.DateTimeField(db_index=True)
-    permalink_url = models.URLField()
-    image_url = models.URLField()
-    thumb_url = models.URLField(blank=True)
-    caption = models.TextField(blank=True)
-
-    class Meta:
-        ordering = ['-created_time']
-        verbose_name = 'Zdjęcie FB'
-        verbose_name_plural = 'Zdjęcia FB'
-
-    def __str__(self):
-        return self.caption or self.fb_photo_id
 
 
 class HeroImage(TimeStamped):

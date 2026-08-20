@@ -6,14 +6,29 @@
 
 {% block content %}
 
-<article>
+<article class="event-detail">
   <h1>{{ item.title }}</h1>
-  {% if item.cover_url %}<img src="{{ item.cover_url }}" alt="" loading="lazy" style="max-width:640px" />{% endif %}
-  <p>
-    <strong>Kiedy:</strong> {{ item.start_date }}{% if item.end_date %} – {{ item.end_date }}{% endif %}
-    {% if item.location %}<br><strong>Miejsce:</strong> {{ item.location }}{% endif %}
+  <p class="event-meta">
+    {{ item.start_date|date:'d.m.Y' }}{% if item.end_date %} – {{ item.end_date|date:'d.m.Y' }}{% endif %}
+    {% if item.location %} • {{ item.location }}{% endif %}
   </p>
-  <div class="content">{{ item.description|linebreaks }}</div>
+
+  {% if item.cover_url and not item.photos.all %}
+    <img src="{{ item.cover_url }}" alt="" loading="lazy" class="event-detail-cover" />
+  {% endif %}
+
+  <div class="prose">{{ item.description|linebreaks }}</div>
+
+  {% if item.photos.all %}
+    <h2>Zdjęcia</h2>
+    <div class="photo-grid">
+      {% for p in item.photos.all %}
+        <a href="{{ p.image.url }}" target="_blank" rel="noopener" class="photo-grid-item">
+          <img src="{{ p.image.url }}" alt="{{ p.caption|default:item.title }}" loading="lazy">
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
 </article>
 
 {% endblock %}

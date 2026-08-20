@@ -5,31 +5,92 @@
 {% block content %}
 <h1>Aktualności</h1>
 
-<div class="news-grid">
-{% for item in items %}
-  <article class="news-card">
-    <a href="{% url 'news_detail' item.pk %}" class="news-card-media">
-      {% with first=item.images.first %}
-        {% if first %}
-          <img src="{{ first.image.url }}" alt="{{ first.caption|default:item.title }}" loading="lazy">
-        {% elif item.image_url %}
+<section class="news-row-section">
+  <div class="news-row-header">
+    <h2>U nas</h2>
+    {% if own_page.paginator.num_pages > 1 %}
+      <div class="row-nav">
+        {% if own_page.has_previous %}
+          <a href="{% querystring own_page=own_page.previous_page_number %}" class="row-nav-btn" aria-label="Poprzednie">←</a>
+        {% else %}
+          <span class="row-nav-btn is-disabled" aria-hidden="true">←</span>
+        {% endif %}
+        {% if own_page.has_next %}
+          <a href="{% querystring own_page=own_page.next_page_number %}" class="row-nav-btn" aria-label="Następne">→</a>
+        {% else %}
+          <span class="row-nav-btn is-disabled" aria-hidden="true">→</span>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="news-grid news-grid-row">
+  {% for item in own_page %}
+    <article class="news-card">
+      <a href="{% url 'news_detail' item.pk %}" class="news-card-media">
+        {% with first=item.images.first %}
+          {% if first %}
+            <img src="{{ first.image.url }}" alt="{{ first.caption|default:item.title }}" loading="lazy">
+          {% elif item.image_url %}
+            <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy">
+          {% else %}
+            <div class="news-card-media-placeholder"></div>
+          {% endif %}
+        {% endwith %}
+      </a>
+      <div class="news-card-body">
+        <time class="news-card-date">{{ item.published_at|date:'d.m.Y' }}</time>
+        <h3><a href="{% url 'news_detail' item.pk %}">{{ item.title|default:"Aktualność" }}</a></h3>
+        <p>{{ item.body|truncatewords:20 }}</p>
+        <a class="news-card-more" href="{% url 'news_detail' item.pk %}">Czytaj więcej →</a>
+      </div>
+    </article>
+  {% empty %}
+    <p>Brak aktualności.</p>
+  {% endfor %}
+  </div>
+</section>
+
+<section class="news-row-section">
+  <div class="news-row-header">
+    <h2>Z centrali PTTK</h2>
+    {% if central_page.paginator.num_pages > 1 %}
+      <div class="row-nav">
+        {% if central_page.has_previous %}
+          <a href="{% querystring central_page=central_page.previous_page_number %}" class="row-nav-btn" aria-label="Poprzednie">←</a>
+        {% else %}
+          <span class="row-nav-btn is-disabled" aria-hidden="true">←</span>
+        {% endif %}
+        {% if central_page.has_next %}
+          <a href="{% querystring central_page=central_page.next_page_number %}" class="row-nav-btn" aria-label="Następne">→</a>
+        {% else %}
+          <span class="row-nav-btn is-disabled" aria-hidden="true">→</span>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+  <p class="event-meta">Nowości ze strony <a href="https://pttk.pl" target="_blank" rel="noopener">pttk.pl</a></p>
+
+  <div class="news-grid news-grid-row">
+  {% for item in central_page %}
+    <a href="{{ item.link }}" target="_blank" rel="noopener" class="news-card">
+      <div class="news-card-media">
+        {% if item.image_url %}
           <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy">
         {% else %}
           <div class="news-card-media-placeholder"></div>
         {% endif %}
-      {% endwith %}
+      </div>
+      <div class="news-card-body">
+        <time class="news-card-date">{{ item.published_at|date:'d.m.Y' }}</time>
+        <h3>{{ item.title }}</h3>
+        <p>{{ item.excerpt|truncatewords:20 }}</p>
+        <span class="news-card-more">Czytaj na pttk.pl →</span>
+      </div>
     </a>
-    <div class="news-card-body">
-      <time class="news-card-date">{{ item.published_at|date:'d.m.Y' }}</time>
-      <h2><a href="{% url 'news_detail' item.pk %}">{{ item.title|default:"Aktualność" }}</a></h2>
-      <p>{{ item.body|truncatewords:24 }}</p>
-      <a class="news-card-more" href="{% url 'news_detail' item.pk %}">Czytaj więcej →</a>
-    </div>
-  </article>
-{% empty %}
-  <p>Brak aktualności.</p>
-{% endfor %}
-</div>
-
-{% include 'partials/pagination.html' %}
+  {% empty %}
+    <p>Brak aktualności z centrali.</p>
+  {% endfor %}
+  </div>
+</section>
 {% endblock %}
