@@ -1,7 +1,17 @@
 from django.urls import path
+from django.contrib.sitemaps.views import sitemap
 from . import views
+from .sitemaps import StaticViewSitemap, NewsSitemap, EventSitemap
+
+sitemaps = {
+    "static": StaticViewSitemap,
+    "aktualnosci": NewsSitemap,
+    "wydarzenia": EventSitemap,
+}
 
 urlpatterns = [
+    path('robots.txt', views.robots_txt, name='robots_txt'),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     path('', views.index, name='index'),
     path('aktualnosci/', views.news_list, name='news_list'),
     path('aktualnosci/<int:pk>/', views.news_detail, name='news_detail'),

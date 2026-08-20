@@ -3,6 +3,8 @@ from django.utils import timezone
 from django.contrib import messages
 from django.core.mail import EmailMessage
 from django.conf import settings
+from django.core.paginator import Paginator
+from django.http import HttpResponse
 from .models import Post, PostImage, Event, Person, Document, FbAlbum, FbPhoto, HeroImage
 from .forms import ContactForm
 
@@ -16,7 +18,8 @@ def index(request):
 
 def news_list(request):
     items = Post.objects.filter(is_published=True).prefetch_related('images').order_by('-published_at')
-    return render(request, 'news/list.html', {'items': items})
+    page_obj = Paginator(items, 10).get_page(request.GET.get('page'))
+    return render(request, 'news/list.html', {'items': page_obj.object_list, 'page_obj': page_obj})
 
 def news_detail(request, pk):
     item = get_object_or_404(Post.objects.prefetch_related('images'), pk=pk, is_published=True)
@@ -24,7 +27,8 @@ def news_detail(request, pk):
 
 def event_list(request):
     items = Event.objects.filter(is_published=True).order_by('start_date')
-    return render(request, 'events/list.html', {'items': items})
+    page_obj = Paginator(items, 15).get_page(request.GET.get('page'))
+    return render(request, 'events/list.html', {'items': page_obj.object_list, 'page_obj': page_obj})
 
 def event_detail(request, slug):
     item = get_object_or_404(Event, slug=slug, is_published=True)
@@ -106,3 +110,12 @@ def historia(request):
 
 def odznaki(request):
     return render(request, "odznaki.html")
+
+def robots_txt(request):
+    lines = [
+        "User-agent: *",
+        "Allow: /",
+        "Disallow: /admin/",
+        f"Sitemap: {request.scheme}://{request.get_host()}/sitemap.xml",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
