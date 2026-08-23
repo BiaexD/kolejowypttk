@@ -21,7 +21,7 @@
     <div class="event-info">
       <h2>{{ e.title }}</h2>
       <p class="event-meta">
-        {{ e.start_date|date:'d.m.Y' }}{% if e.end_date %} – {{ e.end_date|date:'d.m.Y' }}{% endif %}
+        {{ e.start_date|date:'d.m.Y' }}{% if e.start_time %}, {{ e.start_time|time:'H:i' }}{% endif %}{% if e.end_date %} – {{ e.end_date|date:'d.m.Y' }}{% endif %}
         {% if e.location %} • {{ e.location }}{% endif %}
       </p>
     </div>

@@ -17,7 +17,7 @@
       <div>
         <div class="panel-list-row-title">{{ event.title }}</div>
         <div class="panel-list-row-meta">
-          {{ event.start_date|date:'d.m.Y' }}{% if event.end_date %} – {{ event.end_date|date:'d.m.Y' }}{% endif %}
+          {{ event.start_date|date:'d.m.Y' }}{% if event.start_time %}, {{ event.start_time|time:'H:i' }}{% endif %}{% if event.end_date %} – {{ event.end_date|date:'d.m.Y' }}{% endif %}
           {% if event.location %} • {{ event.location }}{% endif %}
         </div>
       </div>
@@ -38,7 +38,7 @@
       <div>
         <div class="panel-list-row-title">{{ event.title }}</div>
         <div class="panel-list-row-meta">
-          {{ event.start_date|date:'d.m.Y' }}{% if event.end_date %} – {{ event.end_date|date:'d.m.Y' }}{% endif %}
+          {{ event.start_date|date:'d.m.Y' }}{% if event.start_time %}, {{ event.start_time|time:'H:i' }}{% endif %}{% if event.end_date %} – {{ event.end_date|date:'d.m.Y' }}{% endif %}
           {% if event.location %} • {{ event.location }}{% endif %}
         </div>
       </div>

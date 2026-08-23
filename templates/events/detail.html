@@ -14,9 +14,15 @@
 <article class="event-detail">
   <h1>{{ item.title }}</h1>
   <p class="event-meta">
-    {{ item.start_date|date:'d.m.Y' }}{% if item.end_date %} – {{ item.end_date|date:'d.m.Y' }}{% endif %}
-    {% if item.location %} • {{ item.location }}{% endif %}
+    {{ item.start_date|date:'d.m.Y' }}{% if item.start_time %}, {{ item.start_time|time:'H:i' }}{% endif %}
+    {% if item.end_date %} – {{ item.end_date|date:'d.m.Y' }}{% if item.end_time %}, {{ item.end_time|time:'H:i' }}{% endif %}{% endif %}
   </p>
+  {% if item.location or item.end_location %}
+    <p class="event-meta-place">
+      {% if item.location %}<strong>Start:</strong> {{ item.location }}{% endif %}
+      {% if item.end_location %}{% if item.location %} &nbsp;•&nbsp; {% endif %}<strong>Meta:</strong> {{ item.end_location }}{% endif %}
+    </p>
+  {% endif %}
 
   {% if item.cover_url and not item.photos.all %}
     <img src="{{ item.cover_url }}" alt="" loading="lazy" class="event-detail-cover" />

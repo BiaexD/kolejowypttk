@@ -24,17 +24,31 @@
         {% if form.start_date.errors %}<div class="field-error">{{ form.start_date.errors }}</div>{% endif %}
       </div>
       <div class="field">
-        <label for="{{ form.end_date.id_for_label }}">Data zakończenia (opcjonalnie)</label>
-        {{ form.end_date }}
+        <label for="{{ form.start_time.id_for_label }}">Godzina rozpoczęcia (opcjonalnie)</label>
+        {{ form.start_time }}
       </div>
     </div>
     <div class="field">
-      <label for="{{ form.location.id_for_label }}">Miejsce</label>
+      <label for="{{ form.location.id_for_label }}">Miejsce rozpoczęcia</label>
       {{ form.location }}
       <p class="field-hint">
         Podaj pełny adres (ulica, numer, miejscowość) — po zapisaniu strona sama znajdzie go na mapie
         i pokaże odwiedzającym. Jeśli się nie uda, dostaniesz o tym informację.
       </p>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label for="{{ form.end_date.id_for_label }}">Data zakończenia (opcjonalnie)</label>
+        {{ form.end_date }}
+      </div>
+      <div class="field">
+        <label for="{{ form.end_time.id_for_label }}">Godzina zakończenia (opcjonalnie)</label>
+        {{ form.end_time }}
+      </div>
+    </div>
+    <div class="field">
+      <label for="{{ form.end_location.id_for_label }}">Miejsce zakończenia (opcjonalnie)</label>
+      {{ form.end_location }}
     </div>
     {% if form.non_field_errors %}<div class="field-error">{{ form.non_field_errors }}</div>{% endif %}
 

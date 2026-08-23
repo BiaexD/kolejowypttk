@@ -20,16 +20,18 @@
       <img src="{% static 'img/logo1.jpg' %}" alt="{{ SITE_NAME }}" class="brand-logo">
       <span class="brand-text">Panel redakcyjny<small>{{ SITE_NAME }}</small></span>
     </a>
-    {% if user.is_authenticated %}
-      <div class="panel-topbar-actions">
+    <div class="panel-topbar-actions">
+      {% if user.is_authenticated %}
         <span class="panel-user">{{ user.first_name|default:user.username }}</span>
-        <a href="{% url 'index' %}" class="btn">Zobacz stronę</a>
+      {% endif %}
+      <a href="{% url 'index' %}" class="btn">Zobacz stronę</a>
+      {% if user.is_authenticated %}
         <form method="post" action="{% url 'panel_logout' %}" style="display:inline">
           {% csrf_token %}
           <button type="submit" class="btn">Wyloguj</button>
         </form>
-      </div>
-    {% endif %}
+      {% endif %}
+    </div>
   </div>
   {% if user.is_authenticated %}
   <nav class="panel-nav">

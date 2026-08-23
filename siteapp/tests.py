@@ -1,4 +1,5 @@
 import io
+from datetime import time
 from unittest import mock
 
 from django.contrib.auth import get_user_model
@@ -295,6 +296,27 @@ class EventTest(TestCase):
         self.assertContains(response, 'data-lat="52.4325844"')
         self.assertContains(response, 'data-lng="16.6989707"')
         self.assertNotContains(response, 'data-lat="52,4325844"')
+
+    def test_start_and_end_time_and_place_shown_on_detail_page(self):
+        event = Event.objects.create(
+            title="Rajd z godzinami", slug="rajd-z-godzinami", description="Opis",
+            start_date=timezone.now().date(), start_time=time(9, 0),
+            end_date=timezone.now().date(), end_time=time(16, 30),
+            location="Dworzec Poznań Główny", end_location="Rynek w Puszczykowie",
+        )
+        response = self.client.get(event.get_absolute_url())
+        self.assertContains(response, "09:00")
+        self.assertContains(response, "16:30")
+        self.assertContains(response, "Dworzec Poznań Główny")
+        self.assertContains(response, "Rynek w Puszczykowie")
+
+    def test_start_and_end_time_are_optional(self):
+        event = Event.objects.create(
+            title="Rajd bez godzin", slug="rajd-bez-godzin", description="Opis",
+            start_date=timezone.now().date(),
+        )
+        response = self.client.get(event.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
 
 
 class GalleryTest(TestCase):
@@ -602,6 +624,24 @@ class PanelContentTest(TestCase):
             "location": "Poznań, Stary Rynek",
         })
         mock_geocode.assert_not_called()
+
+    @mock.patch("siteapp.panel_views.geocode_address")
+    def test_create_event_saves_start_and_end_time_and_place(self, mock_geocode):
+        mock_geocode.return_value = None
+        self.client.post(reverse("panel_event_create"), {
+            "title": "Rajd z godzinami",
+            "description": "Opis",
+            "start_date": "2026-09-01",
+            "start_time": "09:00",
+            "location": "Dworzec Poznań Główny",
+            "end_date": "2026-09-02",
+            "end_time": "16:30",
+            "end_location": "Rynek w Puszczykowie",
+        })
+        event = Event.objects.get(title="Rajd z godzinami")
+        self.assertEqual(str(event.start_time), "09:00:00")
+        self.assertEqual(str(event.end_time), "16:30:00")
+        self.assertEqual(event.end_location, "Rynek w Puszczykowie")
 
     def test_create_document_requires_a_file(self):
         response = self.client.post(reverse("panel_document_create"), {

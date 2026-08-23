@@ -81,10 +81,16 @@ class PanelPostForm(forms.ModelForm):
 class PanelEventForm(forms.ModelForm):
     class Meta:
         model = Event
-        fields = ['title', 'description', 'start_date', 'end_date', 'location']
+        fields = [
+            'title', 'description',
+            'start_date', 'start_time', 'location',
+            'end_date', 'end_time', 'end_location',
+        ]
         widgets = {
             'start_date': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'start_time': forms.TimeInput(attrs={'type': 'time'}, format='%H:%M'),
             'end_date': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'end_time': forms.TimeInput(attrs={'type': 'time'}, format='%H:%M'),
             'description': forms.Textarea(attrs={'rows': 8}),
         }
 
