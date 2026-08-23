@@ -1,0 +1,29 @@
+{% extends 'panel/base_panel.html' %}
+{% block title %}Aktualności{% endblock %}
+
+{% block content %}
+<div class="panel-list-header">
+  <h1>Aktualności</h1>
+  <a href="{% url 'panel_post_create' %}" class="btn btn-primary">+ Dodaj aktualność</a>
+</div>
+
+<div class="panel-list">
+  {% for post in posts %}
+    <div class="panel-list-row">
+      <div>
+        <div class="panel-list-row-title">{{ post.title|default:"(bez tytułu)" }}</div>
+        <div class="panel-list-row-meta">
+          {{ post.published_at|date:'d.m.Y' }}
+          {% if not post.is_published %}• niepublikowana{% endif %}
+        </div>
+      </div>
+      <div class="panel-list-actions">
+        <a href="{% url 'panel_post_edit' post.pk %}" class="btn">Edytuj</a>
+        <a href="{% url 'panel_post_delete' post.pk %}" class="btn">Usuń</a>
+      </div>
+    </div>
+  {% empty %}
+    <div class="panel-empty">Brak aktualności. Kliknij „Dodaj aktualność”, żeby dodać pierwszą.</div>
+  {% endfor %}
+</div>
+{% endblock %}

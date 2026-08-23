@@ -1,0 +1,36 @@
+{% extends 'panel/base_panel.html' %}
+{% block title %}{% if object %}Edytuj slajd{% else %}Nowy slajd{% endif %}{% endblock %}
+
+{% block content %}
+<h1>{% if object %}Edytuj slajd{% else %}Nowy slajd{% endif %}</h1>
+
+<div class="panel-form-card">
+  <form method="post" enctype="multipart/form-data" class="contact-form">
+    {% csrf_token %}
+    <div class="field">
+      <label for="{{ form.image.id_for_label }}">Zdjęcie</label>
+      {{ form.image }}
+      {% if object.image %}
+        <img src="{{ object.image.url }}" alt="" style="max-width:280px; margin-top:.6rem; border-radius:10px; display:block">
+      {% endif %}
+      {% if form.image.errors %}<div class="field-error">{{ form.image.errors }}</div>{% endif %}
+    </div>
+    <div class="field">
+      <label for="{{ form.title.id_for_label }}">Tytuł (opcjonalnie, tylko do rozpoznania na liście)</label>
+      {{ form.title }}
+    </div>
+    <div class="field">
+      <label for="{{ form.order.id_for_label }}">Kolejność (0 = pierwsze)</label>
+      {{ form.order }}
+    </div>
+    <div class="field">
+      <label><input type="checkbox" name="{{ form.is_active.html_name }}" {% if form.is_active.value %}checked{% endif %}> Aktywny</label>
+    </div>
+    {% if form.non_field_errors %}<div class="field-error">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Zapisz</button>
+      <a href="{% url 'panel_hero_list' %}" class="btn">Anuluj</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

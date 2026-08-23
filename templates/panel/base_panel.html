@@ -1,0 +1,54 @@
+{% load static %}
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{% block title %}Panel redakcyjny{% endblock %} — {{ SITE_NAME }}</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="{% static 'img/logo1.jpg' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body class="panel-body">
+
+<header class="panel-topbar">
+  <div class="container panel-topbar-inner">
+    <a class="brand" href="{% url 'panel_dashboard' %}">
+      <img src="{% static 'img/logo1.jpg' %}" alt="{{ SITE_NAME }}" class="brand-logo">
+      <span class="brand-text">Panel redakcyjny<small>{{ SITE_NAME }}</small></span>
+    </a>
+    {% if user.is_authenticated %}
+      <div class="panel-topbar-actions">
+        <span class="panel-user">{{ user.first_name|default:user.username }}</span>
+        <a href="{% url 'index' %}" class="btn">Zobacz stronę</a>
+        <form method="post" action="{% url 'panel_logout' %}" style="display:inline">
+          {% csrf_token %}
+          <button type="submit" class="btn">Wyloguj</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+  {% if user.is_authenticated %}
+  <nav class="panel-nav">
+    <div class="container panel-nav-inner">
+      <a href="{% url 'panel_dashboard' %}">Pulpit</a>
+      <a href="{% url 'panel_post_list' %}">Aktualności</a>
+      <a href="{% url 'panel_event_list' %}">Wydarzenia</a>
+      <a href="{% url 'panel_person_list' %}">Władze</a>
+      <a href="{% url 'panel_document_list' %}">Dokumenty</a>
+      <a href="{% url 'panel_hero_list' %}">Zdjęcie główne</a>
+    </div>
+  </nav>
+  {% endif %}
+</header>
+
+<main class="container panel-main">
+  {% include 'partials/messages.html' %}
+  {% block content %}{% endblock %}
+</main>
+
+</body>
+</html>

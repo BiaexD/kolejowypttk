@@ -1,0 +1,30 @@
+{% extends 'panel/base_panel.html' %}
+{% block title %}Pulpit{% endblock %}
+
+{% block content %}
+<h1>Witaj, {{ user.first_name|default:user.username }}</h1>
+<p class="muted">Wybierz, co chcesz zrobić.</p>
+
+<div class="panel-card-grid">
+  <a href="{% url 'panel_post_list' %}" class="panel-card">
+    <h2>Aktualności</h2>
+    <p>Dodawaj i edytuj wpisy, wraz ze zdjęciami.</p>
+  </a>
+  <a href="{% url 'panel_event_list' %}" class="panel-card">
+    <h2>Wydarzenia</h2>
+    <p>Dodawaj rajdy i wydarzenia, wraz ze zdjęciami do galerii.</p>
+  </a>
+  <a href="{% url 'panel_person_list' %}" class="panel-card">
+    <h2>Władze</h2>
+    <p>Zarząd, Sąd Koleżeński, Komisja Rewizyjna.</p>
+  </a>
+  <a href="{% url 'panel_document_list' %}" class="panel-card">
+    <h2>Dokumenty</h2>
+    <p>Statuty, regulaminy i inne pliki do pobrania.</p>
+  </a>
+  <a href="{% url 'panel_hero_list' %}" class="panel-card">
+    <h2>Zdjęcie główne</h2>
+    <p>Duże zdjęcie na górze strony głównej.</p>
+  </a>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'panel/base_panel.html' %}
+{% block title %}Dokumenty{% endblock %}
+
+{% block content %}
+<div class="panel-list-header">
+  <h1>Dokumenty</h1>
+  <a href="{% url 'panel_document_create' %}" class="btn btn-primary">+ Dodaj dokument</a>
+</div>
+
+<div class="panel-list">
+  {% for doc in documents %}
+    <div class="panel-list-row">
+      <div>
+        <div class="panel-list-row-title">{{ doc.title }}</div>
+        <div class="panel-list-row-meta">
+          {% if doc.category %}{{ doc.category }} • {% endif %}
+          {% if not doc.is_public %}niewidoczny publicznie{% else %}widoczny publicznie{% endif %}
+        </div>
+      </div>
+      <div class="panel-list-actions">
+        <a href="{% url 'panel_document_edit' doc.pk %}" class="btn">Edytuj</a>
+        <a href="{% url 'panel_document_delete' doc.pk %}" class="btn">Usuń</a>
+      </div>
+    </div>
+  {% empty %}
+    <div class="panel-empty">Brak dokumentów. Kliknij „Dodaj dokument”, żeby dodać pierwszy.</div>
+  {% endfor %}
+</div>
+{% endblock %}

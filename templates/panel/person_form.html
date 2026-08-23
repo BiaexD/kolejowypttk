@@ -1,0 +1,46 @@
+{% extends 'panel/base_panel.html' %}
+{% block title %}{% if object %}Edytuj osobę{% else %}Nowa osoba{% endif %}{% endblock %}
+
+{% block content %}
+<h1>{% if object %}Edytuj osobę{% else %}Nowa osoba{% endif %}</h1>
+
+<div class="panel-form-card">
+  <form method="post" class="contact-form">
+    {% csrf_token %}
+    <div class="field">
+      <label for="{{ form.name.id_for_label }}">Imię i nazwisko</label>
+      {{ form.name }}
+      {% if form.name.errors %}<div class="field-error">{{ form.name.errors }}</div>{% endif %}
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label for="{{ form.body.id_for_label }}">Organ</label>
+        {{ form.body }}
+      </div>
+      <div class="field">
+        <label for="{{ form.role.id_for_label }}">Funkcja</label>
+        {{ form.role }}
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label for="{{ form.email.id_for_label }}">Email (opcjonalnie)</label>
+        {{ form.email }}
+      </div>
+      <div class="field">
+        <label for="{{ form.phone.id_for_label }}">Telefon (opcjonalnie)</label>
+        {{ form.phone }}
+      </div>
+    </div>
+    <div class="field">
+      <label for="{{ form.order.id_for_label }}">Kolejność wyświetlania (0 = pierwsze)</label>
+      {{ form.order }}
+    </div>
+    {% if form.non_field_errors %}<div class="field-error">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Zapisz</button>
+      <a href="{% url 'panel_person_list' %}" class="btn">Anuluj</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'panel/base_panel.html' %}
+{% block title %}Logowanie{% endblock %}
+
+{% block content %}
+<div class="panel-auth-card">
+  <h1>Logowanie</h1>
+  <form method="post" class="contact-form">
+    {% csrf_token %}
+    <div class="field">
+      <label for="{{ form.username.id_for_label }}">Nazwa użytkownika</label>
+      {{ form.username }}
+    </div>
+    <div class="field">
+      <label for="{{ form.password.id_for_label }}">Hasło</label>
+      {{ form.password }}
+    </div>
+    {% if form.non_field_errors %}
+      <div class="field-error">{{ form.non_field_errors }}</div>
+    {% endif %}
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Zaloguj się</button>
+    </div>
+  </form>
+  <p class="panel-auth-alt">Nie masz jeszcze konta? <a href="{% url 'panel_signup' %}">Zarejestruj się</a></p>
+</div>
+{% endblock %}

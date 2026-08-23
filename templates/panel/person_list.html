@@ -1,0 +1,26 @@
+{% extends 'panel/base_panel.html' %}
+{% block title %}Władze{% endblock %}
+
+{% block content %}
+<div class="panel-list-header">
+  <h1>Władze</h1>
+  <a href="{% url 'panel_person_create' %}" class="btn btn-primary">+ Dodaj osobę</a>
+</div>
+
+<div class="panel-list">
+  {% for person in people %}
+    <div class="panel-list-row">
+      <div>
+        <div class="panel-list-row-title">{{ person.name }}</div>
+        <div class="panel-list-row-meta">{{ person.get_role_display }} — {{ person.get_body_display }}</div>
+      </div>
+      <div class="panel-list-actions">
+        <a href="{% url 'panel_person_edit' person.pk %}" class="btn">Edytuj</a>
+        <a href="{% url 'panel_person_delete' person.pk %}" class="btn">Usuń</a>
+      </div>
+    </div>
+  {% empty %}
+    <div class="panel-empty">Brak osób. Kliknij „Dodaj osobę”, żeby dodać pierwszą.</div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'panel/base_panel.html' %}
+{% block title %}{% if object %}Edytuj dokument{% else %}Nowy dokument{% endif %}{% endblock %}
+
+{% block content %}
+<h1>{% if object %}Edytuj dokument{% else %}Nowy dokument{% endif %}</h1>
+
+<div class="panel-form-card">
+  <form method="post" enctype="multipart/form-data" class="contact-form">
+    {% csrf_token %}
+    <div class="field">
+      <label for="{{ form.title.id_for_label }}">Tytuł</label>
+      {{ form.title }}
+      {% if form.title.errors %}<div class="field-error">{{ form.title.errors }}</div>{% endif %}
+    </div>
+    <div class="field">
+      <label for="{{ form.category.id_for_label }}">Kategoria (opcjonalnie)</label>
+      {{ form.category }}
+    </div>
+    <div class="field">
+      <label for="{{ form.file.id_for_label }}">Plik (PDF itp.)</label>
+      {{ form.file }}
+      {% if object.file %}<p class="muted" style="margin:.4rem 0 0">Obecny plik: {{ object.file.name }}</p>{% endif %}
+      {% if form.file.errors %}<div class="field-error">{{ form.file.errors }}</div>{% endif %}
+    </div>
+    <div class="field">
+      <label><input type="checkbox" name="{{ form.is_public.html_name }}" {% if form.is_public.value %}checked{% endif %}> Widoczny publicznie</label>
+    </div>
+    {% if form.non_field_errors %}<div class="field-error">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Zapisz</button>
+      <a href="{% url 'panel_document_list' %}" class="btn">Anuluj</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

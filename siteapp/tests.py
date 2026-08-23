@@ -1,12 +1,14 @@
 import io
 
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 from PIL import Image
 
-from .models import Post, Event, EventPhoto, Person, CentralNews
+from .models import Post, Event, EventPhoto, Person, CentralNews, Document
 
 
 def tiny_jpeg():
@@ -157,3 +159,121 @@ class ContactFormTest(TestCase):
         # Invalid form re-renders the page instead of redirecting.
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context["form"].is_valid())
+
+
+class RedaktorzyGroupTest(TestCase):
+    """The branch head's account should manage content but not users/auth."""
+
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_user(username="redaktor", password="x", is_staff=True)
+        self.user.groups.add(Group.objects.get(name="Redaktorzy"))
+        self.client.force_login(self.user)
+
+    def test_can_reach_admin_dashboard(self):
+        response = self.client.get(reverse("admin:index"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_can_add_a_post(self):
+        response = self.client.get(reverse("admin:siteapp_post_add"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_cannot_manage_users_or_groups(self):
+        self.assertEqual(self.client.get(reverse("admin:auth_user_changelist")).status_code, 403)
+        self.assertEqual(self.client.get(reverse("admin:auth_group_changelist")).status_code, 403)
+
+    def test_cannot_add_or_edit_central_news_but_can_view_and_delete(self):
+        item = CentralNews.objects.create(
+            wp_id=1, title="Z centrali", link="https://pttk.pl/x/", published_at=timezone.now(),
+        )
+        self.assertEqual(self.client.get(reverse("admin:siteapp_centralnews_add")).status_code, 403)
+        self.assertEqual(self.client.get(reverse("admin:siteapp_centralnews_changelist")).status_code, 200)
+        self.assertEqual(self.client.get(reverse("admin:siteapp_centralnews_delete", args=[item.pk])).status_code, 200)
+
+
+class PanelAuthTest(TestCase):
+    """The self-service /panel/ signup + approval flow."""
+
+    def test_signup_creates_inactive_user(self):
+        response = self.client.post(reverse("panel_signup"), {
+            "full_name": "Andrzej Testowy",
+            "email": "andrzej@example.com",
+            "username": "andrzej",
+            "password1": "bardzo-tajne-haslo",
+            "password2": "bardzo-tajne-haslo",
+            "honeypot": "",
+        })
+        self.assertEqual(response.status_code, 200)
+        user = get_user_model().objects.get(username="andrzej")
+        self.assertFalse(user.is_active)
+        self.assertFalse(user.is_staff)
+
+    def test_pending_user_cannot_log_in(self):
+        get_user_model().objects.create_user(username="pending", password="haslo12345", is_active=False)
+        response = self.client.post(reverse("panel_login"), {"username": "pending", "password": "haslo12345"})
+        self.assertContains(response, "czeka jeszcze na zatwierdzenie")
+
+    def test_approved_user_can_log_in_and_reach_dashboard(self):
+        user = get_user_model().objects.create_user(username="approved", password="haslo12345", is_active=True)
+        response = self.client.post(reverse("panel_login"), {"username": "approved", "password": "haslo12345"}, follow=True)
+        self.assertRedirects(response, reverse("panel_dashboard"))
+
+    def test_dashboard_requires_login(self):
+        response = self.client.get(reverse("panel_dashboard"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("panel_login"), response.url)
+
+
+class PanelContentTest(TestCase):
+    """Logged-in editors can manage content through /panel/."""
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(username="editor", password="x", is_active=True)
+        self.client.force_login(self.user)
+
+    def test_create_edit_and_delete_post_with_photo(self):
+        create = self.client.post(reverse("panel_post_create"), {
+            "title": "Nowa aktualność",
+            "body": "Treść",
+            "published_at": "2026-08-23T10:00",
+            "is_published": "on",
+        })
+        post = Post.objects.get(title="Nowa aktualność")
+        self.assertRedirects(create, reverse("panel_post_edit", args=[post.pk]))
+
+        add_photo = self.client.post(
+            reverse("panel_post_photo_add", args=[post.pk]),
+            {"image": tiny_jpeg(), "caption": ""},
+        )
+        self.assertRedirects(add_photo, reverse("panel_post_edit", args=[post.pk]))
+        self.assertEqual(post.images.count(), 1)
+
+        photo = post.images.first()
+        self.client.post(reverse("panel_post_photo_delete", args=[photo.pk]))
+        self.assertEqual(post.images.count(), 0)
+
+        self.client.post(reverse("panel_post_delete", args=[post.pk]))
+        self.assertFalse(Post.objects.filter(pk=post.pk).exists())
+
+    def test_create_event_auto_generates_unique_slug(self):
+        self.client.post(reverse("panel_event_create"), {
+            "title": "Rajd Testowy",
+            "description": "Opis",
+            "start_date": "2026-09-01",
+            "is_published": "on",
+        })
+        self.client.post(reverse("panel_event_create"), {
+            "title": "Rajd Testowy",
+            "description": "Inny opis",
+            "start_date": "2026-10-01",
+            "is_published": "on",
+        })
+        slugs = set(Event.objects.filter(title="Rajd Testowy").values_list("slug", flat=True))
+        self.assertEqual(len(slugs), 2)
+
+    def test_create_document_requires_a_file(self):
+        response = self.client.post(reverse("panel_document_create"), {
+            "title": "Statut", "category": "", "is_public": "on",
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Document.objects.filter(title="Statut").exists())

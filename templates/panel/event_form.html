@@ -1,0 +1,75 @@
+{% extends 'panel/base_panel.html' %}
+{% block title %}{% if object %}Edytuj wydarzenie{% else %}Nowe wydarzenie{% endif %}{% endblock %}
+
+{% block content %}
+<h1>{% if object %}Edytuj wydarzenie{% else %}Nowe wydarzenie{% endif %}</h1>
+
+<div class="panel-form-card">
+  <form method="post" class="contact-form">
+    {% csrf_token %}
+    <div class="field">
+      <label for="{{ form.title.id_for_label }}">Tytuł</label>
+      {{ form.title }}
+      {% if form.title.errors %}<div class="field-error">{{ form.title.errors }}</div>{% endif %}
+    </div>
+    <div class="field">
+      <label for="{{ form.description.id_for_label }}">Opis</label>
+      {{ form.description }}
+      {% if form.description.errors %}<div class="field-error">{{ form.description.errors }}</div>{% endif %}
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label for="{{ form.start_date.id_for_label }}">Data rozpoczęcia</label>
+        {{ form.start_date }}
+        {% if form.start_date.errors %}<div class="field-error">{{ form.start_date.errors }}</div>{% endif %}
+      </div>
+      <div class="field">
+        <label for="{{ form.end_date.id_for_label }}">Data zakończenia (opcjonalnie)</label>
+        {{ form.end_date }}
+      </div>
+    </div>
+    <div class="field">
+      <label for="{{ form.location.id_for_label }}">Miejsce</label>
+      {{ form.location }}
+    </div>
+    <div class="field">
+      <label><input type="checkbox" name="{{ form.is_published.html_name }}" {% if form.is_published.value %}checked{% endif %}> Opublikowane (widoczne na stronie)</label>
+    </div>
+    {% if form.non_field_errors %}<div class="field-error">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Zapisz</button>
+      <a href="{% url 'panel_event_list' %}" class="btn">Anuluj</a>
+    </div>
+  </form>
+</div>
+
+{% if object %}
+  <h2 style="margin-top:2rem">Zdjęcia (galeria)</h2>
+  <div class="panel-photo-grid">
+    {% for photo in photos %}
+      <div class="panel-photo-item">
+        <img src="{{ photo.image.url }}" alt="{{ photo.caption }}">
+        <form method="post" action="{% url 'panel_event_photo_delete' photo.pk %}" onsubmit="return confirm('Usunąć to zdjęcie?');">
+          {% csrf_token %}
+          <button type="submit" title="Usuń zdjęcie">×</button>
+        </form>
+      </div>
+    {% empty %}
+      <p class="muted">Brak zdjęć.</p>
+    {% endfor %}
+  </div>
+
+  <form method="post" action="{% url 'panel_event_photo_add' object.pk %}" enctype="multipart/form-data" class="panel-photo-add">
+    {% csrf_token %}
+    <div class="field" style="margin:0">
+      <label for="{{ photo_form.image.id_for_label }}">Dodaj zdjęcie</label>
+      {{ photo_form.image }}
+    </div>
+    <div class="field" style="margin:0; flex:1">
+      <label for="{{ photo_form.caption.id_for_label }}">Podpis (opcjonalnie)</label>
+      {{ photo_form.caption }}
+    </div>
+    <button class="btn btn-primary" type="submit">Dodaj</button>
+  </form>
+{% endif %}
+{% endblock %}

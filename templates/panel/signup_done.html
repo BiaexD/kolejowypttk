@@ -1,0 +1,10 @@
+{% extends 'panel/base_panel.html' %}
+{% block title %}Konto utworzone{% endblock %}
+
+{% block content %}
+<div class="panel-auth-card">
+  <h1>Dziękujemy!</h1>
+  <p>Twoje konto zostało utworzone. Administrator musi je jeszcze zatwierdzić — otrzymasz dostęp wkrótce.</p>
+  <p><a href="{% url 'panel_login' %}" class="btn btn-primary">Wróć do logowania</a></p>
+</div>
+{% endblock %}

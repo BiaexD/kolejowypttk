@@ -1,5 +1,5 @@
 from django import forms
-from .models import Post
+from .models import Post, Document
 
 class ContactForm(forms.Form):
     name = forms.CharField(max_length=120)
@@ -24,4 +24,16 @@ class PostAdminForm(forms.ModelForm):
 
         if not title and not body:
             raise forms.ValidationError("Podaj przynajmniej tytuł lub treść.")
+        return cleaned
+
+
+class DocumentAdminForm(forms.ModelForm):
+    class Meta:
+        model = Document
+        fields = ['title', 'category', 'file', 'file_url', 'is_public']
+
+    def clean(self):
+        cleaned = super().clean()
+        if not cleaned.get('file') and not cleaned.get('file_url'):
+            raise forms.ValidationError("Wgraj plik albo podaj link zewnętrzny.")
         return cleaned

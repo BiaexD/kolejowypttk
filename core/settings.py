@@ -140,6 +140,10 @@ LOGGING = {
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+LOGIN_URL = "panel_login"
+LOGIN_REDIRECT_URL = "panel_dashboard"
+LOGOUT_REDIRECT_URL = "panel_login"
+
 SITE_NAME = "PTTK Pracowników Kolejowych w Poznaniu "
 SITE_TAGLINE = "• Wielkopolska • turystyka • Polskie Towarzystwo Turystyczno Krajoznawcze •"
 FACEBOOK_PAGE_URL = "https://www.facebook.com/profile.php?id=61581487138549"

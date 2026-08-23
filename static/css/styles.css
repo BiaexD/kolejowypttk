@@ -861,7 +861,8 @@ a.news-card:hover h3{color:var(--pttk-green)}
 }
 
 .contact-form input,
-.contact-form textarea{
+.contact-form textarea,
+.contact-form select{
   width: 100%;
   padding: .75rem .85rem;
   border: 1px solid #e3e3e3;
@@ -875,11 +876,25 @@ a.news-card:hover h3{color:var(--pttk-green)}
   resize: vertical;
 }
 
+.contact-form input[type="file"]{
+  padding: .5rem;
+  border: 1px dashed #cfcfcf;
+  background: #fbfffb;
+}
+
 .contact-form input:focus,
-.contact-form textarea:focus{
+.contact-form textarea:focus,
+.contact-form select:focus{
   outline: none;
   border-color: var(--pttk-green);
   box-shadow: 0 0 0 3px rgba(28,124,61,.12);
+}
+
+.contact-form label input[type="checkbox"]{
+  width: auto;
+  margin-right: .5rem;
+  transform: scale(1.2);
+  vertical-align: middle;
 }
 
 .form-grid{
@@ -922,4 +937,216 @@ a.news-card:hover h3{color:var(--pttk-green)}
 
 .pagination span{
   color:var(--muted);
+}
+
+/* =======================================================
+   PANEL REDAKCYJNY (/panel/) — osobny layout, ten sam styl
+   ======================================================= */
+.panel-body{background:#f6faf7}
+
+.panel-topbar{
+  background:#fff;
+  border-bottom:1px solid #eee;
+  position:sticky;
+  top:0;
+  z-index:50;
+}
+
+.panel-topbar-inner{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:1rem 0;
+  flex-wrap:wrap;
+  gap:.8rem;
+}
+
+.panel-topbar-actions{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.panel-topbar-actions form{display:inline}
+
+.panel-topbar-actions button.btn{
+  cursor:pointer;
+  font:inherit;
+  border:1px solid var(--rail-gray);
+}
+
+.panel-user{font-weight:700; color:var(--pttk-dark)}
+
+.panel-nav{background:var(--pttk-dark)}
+
+.panel-nav-inner{
+  display:flex;
+  gap:1.75rem;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+
+.panel-nav-inner::-webkit-scrollbar{display:none}
+
+.panel-nav-inner a{
+  color:#e8efe9;
+  text-decoration:none;
+  font-weight:600;
+  padding:.85rem 0;
+  white-space:nowrap;
+  border-bottom:3px solid transparent;
+}
+
+.panel-nav-inner a:hover{color:#fff}
+
+.panel-main{padding-top:1.5rem; padding-bottom:3rem}
+
+.panel-auth-card{
+  max-width:440px;
+  margin:3rem auto;
+  background:#fff;
+  border:1px solid #eee;
+  border-radius:16px;
+  padding:2rem;
+}
+
+.panel-auth-alt{margin-top:1rem; text-align:center; color:var(--muted)}
+.panel-auth-alt a{color:var(--pttk-green); font-weight:600; text-decoration:none}
+.panel-auth-alt a:hover{text-decoration:underline}
+
+.panel-card-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:1.2rem;
+  margin-top:1.5rem;
+}
+
+.panel-card{
+  display:block;
+  background:#fff;
+  border:1px solid #eee;
+  border-radius:16px;
+  padding:1.5rem;
+  text-decoration:none;
+  color:inherit;
+  transition:box-shadow .2s ease, transform .2s ease;
+}
+
+.panel-card:hover{
+  box-shadow:0 10px 26px rgba(0,0,0,.08);
+  transform:translateY(-2px);
+  border-color:var(--pttk-green);
+}
+
+.panel-card h2{margin:0 0 .4rem; color:var(--pttk-dark)}
+.panel-card p{margin:0; color:var(--muted); font-size:.95rem}
+
+.panel-list-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:1.2rem;
+  gap:1rem;
+  flex-wrap:wrap;
+}
+
+.panel-list{
+  display:flex;
+  flex-direction:column;
+  gap:.7rem;
+}
+
+.panel-list-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  background:#fff;
+  border:1px solid #eee;
+  border-radius:12px;
+  padding:1rem 1.2rem;
+  flex-wrap:wrap;
+}
+
+.panel-list-row-title{font-weight:700; color:var(--pttk-dark)}
+.panel-list-row-meta{color:var(--muted); font-size:.9rem; margin-top:.15rem}
+
+.panel-list-actions{display:flex; gap:.6rem; flex-wrap:wrap}
+
+.panel-empty{
+  background:#fff;
+  border:1px dashed var(--rail-gray);
+  border-radius:12px;
+  padding:2rem;
+  text-align:center;
+  color:var(--muted);
+}
+
+.panel-form-card{
+  max-width:720px;
+  background:#fff;
+  border:1px solid #eee;
+  border-radius:16px;
+  padding:1.5rem 1.8rem;
+}
+
+.panel-photo-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  gap:.8rem;
+  margin:1rem 0 1.4rem;
+}
+
+.panel-photo-item{
+  position:relative;
+  border-radius:10px;
+  overflow:hidden;
+  aspect-ratio:1/1;
+  background:#eee;
+}
+
+.panel-photo-item img{width:100%; height:100%; object-fit:cover; display:block}
+
+.panel-photo-item form{position:absolute; top:.35rem; right:.35rem}
+
+.panel-photo-item button{
+  background:rgba(0,0,0,.6);
+  color:#fff;
+  border:none;
+  border-radius:999px;
+  width:30px;
+  height:30px;
+  cursor:pointer;
+  font-weight:700;
+  font-size:1rem;
+  line-height:1;
+}
+
+.panel-photo-item button:hover{background:rgba(176,0,32,.85)}
+
+.panel-photo-add{
+  display:flex;
+  align-items:flex-end;
+  gap:1rem;
+  flex-wrap:wrap;
+  background:#fbfffb;
+  border:1px solid #e6f3e6;
+  border-radius:12px;
+  padding:1.1rem 1.2rem;
+  margin-top:.5rem;
+}
+
+.panel-confirm{max-width:480px; margin:3rem auto; text-align:center}
+
+.panel-confirm .btn-danger{
+  background:#b00020;
+  border-color:#b00020;
+  color:#fff;
+}
+
+.panel-confirm .btn-danger:hover{background:#8e0019; color:#fff}
+
+@media (max-width:760px){
+  .panel-list-row{flex-direction:column; align-items:stretch}
+  .panel-list-actions{justify-content:flex-start}
 }

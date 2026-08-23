@@ -1,6 +1,10 @@
 from django.contrib import admin
 from .models import Post, PostImage, Event, EventPhoto, Person, Document, HeroImage, CentralNews
-from .forms import PostAdminForm
+from .forms import PostAdminForm, DocumentAdminForm
+
+admin.site.site_header = "Panel administracyjny — PTTK Pracownicy Kolejowi"
+admin.site.site_title = "PTTK Kolejowy — panel"
+admin.site.index_title = "Zarządzanie treścią strony"
 
 
 class EventPhotoInline(admin.TabularInline):
@@ -28,10 +32,15 @@ class PersonAdmin(admin.ModelAdmin):
 
 @admin.register(Document)
 class DocumentAdmin(admin.ModelAdmin):
+    form = DocumentAdminForm
     list_display = ('title', 'category', 'is_public', 'created')
     list_filter = ('is_public', 'category')
     search_fields = ('title', 'category')
     ordering = ('category', 'title')
+    fieldsets = (
+        (None, {'fields': ('title', 'category', 'file', 'is_public')}),
+        ('Zaawansowane', {'fields': ('file_url',), 'classes': ('collapse',)}),
+    )
 
 
 class PostImageInline(admin.TabularInline):
@@ -50,8 +59,7 @@ class PostAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Treść', {'fields': ('title', 'body', 'published_at', 'is_published')}),
-        ('Stare zdjęcie / zgodność wsteczna', {'fields': ('image_url',)}),
-        ('Źródła (opcjonalne)', {'fields': ('fb_perma', 'source')}),
+        ('Zaawansowane', {'fields': ('image_url', 'fb_perma', 'source'), 'classes': ('collapse',)}),
     )
     exclude = ('fb_post_id',)
 
@@ -62,10 +70,20 @@ class CentralNewsAdmin(admin.ModelAdmin):
     search_fields = ('title', 'excerpt')
     ordering = ('-published_at',)
 
+    def has_add_permission(self, request):
+        return request.user.is_superuser
+
+    def has_change_permission(self, request, obj=None):
+        return request.user.is_superuser
+
 
 @admin.register(HeroImage)
 class HeroImageAdmin(admin.ModelAdmin):
-    list_display = ('title','order','is_active','created')
-    list_editable = ('order','is_active')
-    search_fields = ('title','image_url')
-    ordering = ('order','created')
+    list_display = ('title', 'order', 'is_active', 'created')
+    list_editable = ('order', 'is_active')
+    search_fields = ('title', 'image_url')
+    ordering = ('order', 'created')
+    fieldsets = (
+        (None, {'fields': ('image', 'title', 'is_active', 'order')}),
+        ('Zaawansowane', {'fields': ('image_url',), 'classes': ('collapse',)}),
+    )
