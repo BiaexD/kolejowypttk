@@ -182,6 +182,15 @@ h1,h2,h3{color:var(--pttk-dark);margin:.6rem 0}
 
 .contact-map-link:hover{text-decoration:underline}
 
+.event-map{
+  height:380px;
+  border-radius:12px;
+  overflow:hidden;
+  border:1px solid #e6f3e6;
+  margin-top:1rem;
+  z-index:1;
+}
+
 /* buttons (uniwersalne, poza hero) */
 .btn{
   display:inline-flex;

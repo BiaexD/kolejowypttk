@@ -163,19 +163,34 @@ class EventTest(TestCase):
             title="Bez lokalizacji", slug="bez-lokalizacji", description="Opis",
             start_date=timezone.now().date(),
         )
-        self.assertIsNone(event.map_embed_url())
+        self.assertIsNone(event.map_link_url())
         response = self.client.get(event.get_absolute_url())
-        self.assertNotContains(response, "openstreetmap.org/export/embed")
+        self.assertNotContains(response, 'id="event-map"')
 
-    def test_map_shown_when_coordinates_set(self):
+    def test_map_and_trails_layer_shown_when_coordinates_set(self):
         event = Event.objects.create(
             title="Z lokalizacją", slug="z-lokalizacja", description="Opis",
             start_date=timezone.now().date(),
             location="Poznań, Stary Rynek", location_lat=52.4082, location_lng=16.9335,
         )
-        self.assertIn("openstreetmap.org/export/embed", event.map_embed_url())
+        self.assertIn("openstreetmap.org/?mlat=", event.map_link_url())
         response = self.client.get(event.get_absolute_url())
-        self.assertContains(response, "openstreetmap.org/export/embed")
+        self.assertContains(response, 'id="event-map"')
+        self.assertContains(response, "tile.waymarkedtrails.org/hiking")
+        self.assertContains(response, "tile.waymarkedtrails.org/cycling")
+
+    def test_map_coordinates_use_a_decimal_point_not_a_comma(self):
+        # Regression: Polish locale formats floats with a comma (52,41), which
+        # silently truncates in JS parseFloat() and drops the pin ~50km away.
+        event = Event.objects.create(
+            title="Lusowo", slug="lusowo-test", description="Opis",
+            start_date=timezone.now().date(),
+            location="Poznańska 10, Lusowo", location_lat=52.4325844, location_lng=16.6989707,
+        )
+        response = self.client.get(event.get_absolute_url())
+        self.assertContains(response, 'data-lat="52.4325844"')
+        self.assertContains(response, 'data-lng="16.6989707"')
+        self.assertNotContains(response, 'data-lat="52,4325844"')
 
 
 class GalleryTest(TestCase):

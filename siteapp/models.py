@@ -139,19 +139,6 @@ class Event(TimeStamped, Trashable):
         first = self.photos.order_by("order", "id").first()
         return first.image.url if first else self.cover_url
 
-    def map_embed_url(self):
-        if self.location_lat is None or self.location_lng is None:
-            return None
-        d_lat, d_lng = 0.004, 0.006
-        bbox = (
-            f"{self.location_lng - d_lng},{self.location_lat - d_lat},"
-            f"{self.location_lng + d_lng},{self.location_lat + d_lat}"
-        )
-        return (
-            f"https://www.openstreetmap.org/export/embed.html?"
-            f"bbox={bbox}&layer=mapnik&marker={self.location_lat},{self.location_lng}"
-        )
-
     def map_link_url(self):
         if self.location_lat is None or self.location_lng is None:
             return None
