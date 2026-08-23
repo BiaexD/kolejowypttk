@@ -17,6 +17,7 @@ urlpatterns = [
     path('aktualnosci/<int:pk>/', views.news_detail, name='news_detail'),
     path('wydarzenia/', views.event_list, name='event_list'),
     path('wydarzenia/<slug:slug>/', views.event_detail, name='event_detail'),
+    path('wydarzenia/<slug:slug>/trasa/', views.event_route, name='event_route'),
     path('wladze/', views.board, name='board'),
     path('dokumenty/', views.docs_list, name='docs_list'),
     path('galeria/', views.gallery_albums, name='gallery_albums'),

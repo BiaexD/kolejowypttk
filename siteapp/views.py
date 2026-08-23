@@ -7,9 +7,10 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from .models import Post, PostImage, Event, Person, Document, HeroImage, CentralNews
 from .forms import ContactForm
+from .geocoding import geocode_address, get_route, ORS_PROFILES
 
 import logging
 logger = logging.getLogger(__name__)
@@ -53,6 +54,41 @@ def event_list(request):
 def event_detail(request, slug):
     item = get_object_or_404(Event.objects.prefetch_related('photos'), slug=slug, is_published=True)
     return render(request, 'events/detail.html', {'item': item})
+
+
+def event_route(request, slug):
+    """Zwraca wyznaczoną trasę (JSON) od podanego punktu startu do miejsca wydarzenia."""
+    item = get_object_or_404(Event, slug=slug, is_published=True)
+    if item.location_lat is None or item.location_lng is None:
+        return JsonResponse({"error": "Wydarzenie nie ma ustawionej lokalizacji."}, status=400)
+
+    profile = request.GET.get("profile", "")
+    if profile not in ORS_PROFILES:
+        return JsonResponse({"error": "Nieprawidłowy środek transportu."}, status=400)
+
+    start_lat = request.GET.get("start_lat")
+    start_lng = request.GET.get("start_lng")
+    start_address = request.GET.get("start_address", "").strip()
+
+    if start_lat and start_lng:
+        try:
+            start_lat, start_lng = float(start_lat), float(start_lng)
+        except ValueError:
+            return JsonResponse({"error": "Nieprawidłowe współrzędne startu."}, status=400)
+    elif start_address:
+        coords = geocode_address(start_address)
+        if coords is None:
+            return JsonResponse({"error": "Nie udało się znaleźć podanego adresu."}, status=400)
+        start_lat, start_lng = coords
+    else:
+        return JsonResponse({"error": "Podaj punkt startowy."}, status=400)
+
+    route = get_route(start_lat, start_lng, item.location_lat, item.location_lng, profile)
+    if route is None:
+        return JsonResponse({"error": "Nie udało się wyznaczyć trasy."}, status=502)
+
+    return JsonResponse(route)
+
 
 def board(request):
     people = Person.objects.all().order_by("body", "order", "role", "name")

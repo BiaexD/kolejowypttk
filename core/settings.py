@@ -164,3 +164,5 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "kontakt@kolejowy.pttk.pl")
 CONTACT_TO_EMAIL = os.environ.get("CONTACT_TO_EMAIL", "kontakt@kolejowy.pttk.pl")
+
+ORS_API_KEY = os.environ.get("ORS_API_KEY", "")

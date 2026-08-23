@@ -29,6 +29,25 @@
     <div id="event-map" class="event-map" data-lat="{{ item.location_lat|unlocalize }}" data-lng="{{ item.location_lng|unlocalize }}" data-title="{{ item.title }}"></div>
     <p class="field-hint">Warstwę szlaków (piesze / rowerowe) przełączysz przyciskiem w prawym górnym rogu mapy. Kolor linii to prawdziwy kolor oznaczenia danego szlaku (żółty, czerwony, niebieski, zielony, czarny) — tak jak na słupkach i drzewach, nie jest to kod pieszy/rowerowy. Więcej o szlaku: <a href="https://waymarkedtrails.org/#hiking?map=13!{{ item.location_lat|unlocalize }}!{{ item.location_lng|unlocalize }}" target="_blank" rel="noopener">zobacz na Waymarked Trails</a>.</p>
     <a href="{{ item.map_link_url }}" target="_blank" rel="noopener" class="contact-map-link">Powiększ mapę →</a>
+
+    <div class="route-planner">
+      <h3>Jak dojechać?</h3>
+      <div class="route-planner-modes" role="radiogroup" aria-label="Środek transportu">
+        <label><input type="radio" name="route-profile" value="foot-walking" checked> Pieszo</label>
+        <label><input type="radio" name="route-profile" value="cycling-regular"> Rowerem</label>
+        <label><input type="radio" name="route-profile" value="driving-car"> Samochodem</label>
+      </div>
+      <button type="button" id="route-geo-btn" class="btn btn-primary">Wyznacz trasę stąd</button>
+      <div id="route-manual" class="route-manual" hidden>
+        <label for="route-address">Skąd wyruszasz?</label>
+        <div class="route-manual-row">
+          <input type="text" id="route-address" placeholder="np. Poznań, ul. Główna 1">
+          <button type="button" id="route-address-btn" class="btn">Policz trasę</button>
+        </div>
+      </div>
+      <p id="route-status" class="field-hint" hidden></p>
+      <p id="route-result" class="route-result" hidden></p>
+    </div>
   {% endif %}
 
   {% if item.photos.all %}
@@ -107,6 +126,82 @@
   }, { collapsed: false }).addTo(map);
 
   L.marker([lat, lng], {icon: markerIcon}).addTo(map).bindPopup(el.dataset.title);
+
+  var routeLayer = null;
+  var statusEl = document.getElementById('route-status');
+  var resultEl = document.getElementById('route-result');
+  var manualEl = document.getElementById('route-manual');
+  var geoBtn = document.getElementById('route-geo-btn');
+  var addressInput = document.getElementById('route-address');
+  var addressBtn = document.getElementById('route-address-btn');
+
+  function selectedProfile() {
+    var checked = document.querySelector('input[name="route-profile"]:checked');
+    return checked ? checked.value : 'foot-walking';
+  }
+
+  function showStatus(text) {
+    statusEl.textContent = text;
+    statusEl.hidden = false;
+    resultEl.hidden = true;
+  }
+
+  function fetchRoute(params) {
+    params.set('profile', selectedProfile());
+    showStatus('Wyznaczam trasę…');
+
+    fetch('{% url "event_route" item.slug %}?' + params.toString())
+      .then(function (r) { return r.json().then(function (data) { return { ok: r.ok, data: data }; }); })
+      .then(function (res) {
+        if (!res.ok) {
+          showStatus(res.data.error || 'Nie udało się wyznaczyć trasy.');
+          return;
+        }
+        if (routeLayer) {
+          map.removeLayer(routeLayer);
+        }
+        routeLayer = L.polyline(res.data.geometry, { color: '#1c7c3d', weight: 5, opacity: 0.85 }).addTo(map);
+        map.fitBounds(routeLayer.getBounds(), { padding: [30, 30] });
+
+        statusEl.hidden = true;
+        resultEl.hidden = false;
+        resultEl.textContent = 'Dystans: ' + res.data.distance_km.toLocaleString('pl-PL') + ' km, czas: ok. ' + res.data.duration_min + ' min.';
+      })
+      .catch(function () {
+        showStatus('Nie udało się wyznaczyć trasy — spróbuj ponownie.');
+      });
+  }
+
+  geoBtn.addEventListener('click', function () {
+    if (!navigator.geolocation) {
+      manualEl.hidden = false;
+      return;
+    }
+    showStatus('Ustalam Twoją lokalizację…');
+    navigator.geolocation.getCurrentPosition(
+      function (pos) {
+        var params = new URLSearchParams();
+        params.set('start_lat', pos.coords.latitude);
+        params.set('start_lng', pos.coords.longitude);
+        fetchRoute(params);
+      },
+      function () {
+        statusEl.hidden = true;
+        manualEl.hidden = false;
+      }
+    );
+  });
+
+  addressBtn.addEventListener('click', function () {
+    var address = addressInput.value.trim();
+    if (!address) {
+      showStatus('Wpisz adres, z którego wyruszasz.');
+      return;
+    }
+    var params = new URLSearchParams();
+    params.set('start_address', address);
+    fetchRoute(params);
+  });
 })();
 </script>
 {% endif %}

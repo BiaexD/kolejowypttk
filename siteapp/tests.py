@@ -145,6 +145,110 @@ class GeocodeAddressTest(TestCase):
         self.assertIsNone(geocode_address(None))
 
 
+class GetRouteTest(TestCase):
+    @mock.patch("siteapp.geocoding.requests.post")
+    def test_returns_geometry_distance_and_duration(self, mock_post):
+        from siteapp.geocoding import get_route
+
+        mock_post.return_value.raise_for_status.return_value = None
+        mock_post.return_value.json.return_value = {
+            "features": [{
+                "geometry": {"coordinates": [[16.9, 52.4], [16.95, 52.45]]},
+                "properties": {"summary": {"distance": 5000, "duration": 1200}},
+            }]
+        }
+
+        result = get_route(52.4, 16.9, 52.45, 16.95, "foot-walking")
+
+        self.assertEqual(result["geometry"], [[52.4, 16.9], [52.45, 16.95]])
+        self.assertEqual(result["distance_km"], 5.0)
+        self.assertEqual(result["duration_min"], 20)
+
+    def test_returns_none_for_unknown_profile(self):
+        from siteapp.geocoding import get_route
+
+        self.assertIsNone(get_route(52.4, 16.9, 52.45, 16.95, "teleport"))
+
+    @mock.patch("siteapp.geocoding.requests.post")
+    def test_returns_none_when_no_features(self, mock_post):
+        from siteapp.geocoding import get_route
+
+        mock_post.return_value.raise_for_status.return_value = None
+        mock_post.return_value.json.return_value = {"features": []}
+
+        self.assertIsNone(get_route(52.4, 16.9, 52.45, 16.95, "foot-walking"))
+
+
+class EventRouteViewTest(TestCase):
+    def setUp(self):
+        self.event = Event.objects.create(
+            title="Rajd z trasą", slug="rajd-z-trasa", description="Opis",
+            start_date=timezone.now().date(),
+            location="Lusowo", location_lat=52.4325844, location_lng=16.6989707,
+        )
+
+    def test_missing_start_returns_400(self):
+        response = self.client.get(reverse("event_route", args=[self.event.slug]), {"profile": "foot-walking"})
+        self.assertEqual(response.status_code, 400)
+
+    def test_invalid_profile_returns_400(self):
+        response = self.client.get(
+            reverse("event_route", args=[self.event.slug]),
+            {"profile": "teleport", "start_lat": "52.4", "start_lng": "16.9"},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    @mock.patch("siteapp.views.get_route")
+    def test_valid_coordinates_return_route_json(self, mock_get_route):
+        mock_get_route.return_value = {
+            "geometry": [[52.4, 16.9], [52.4325844, 16.6989707]],
+            "distance_km": 12.3,
+            "duration_min": 150,
+        }
+        response = self.client.get(
+            reverse("event_route", args=[self.event.slug]),
+            {"profile": "foot-walking", "start_lat": "52.4", "start_lng": "16.9"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["distance_km"], 12.3)
+        mock_get_route.assert_called_once_with(52.4, 16.9, 52.4325844, 16.6989707, "foot-walking")
+
+    @mock.patch("siteapp.views.geocode_address")
+    @mock.patch("siteapp.views.get_route")
+    def test_start_address_is_geocoded_first(self, mock_get_route, mock_geocode):
+        mock_geocode.return_value = (52.41, 16.92)
+        mock_get_route.return_value = {
+            "geometry": [[52.41, 16.92], [52.4325844, 16.6989707]],
+            "distance_km": 10.0,
+            "duration_min": 100,
+        }
+        response = self.client.get(
+            reverse("event_route", args=[self.event.slug]),
+            {"profile": "cycling-regular", "start_address": "Poznań, Stary Rynek"},
+        )
+        self.assertEqual(response.status_code, 200)
+        mock_geocode.assert_called_once_with("Poznań, Stary Rynek")
+        mock_get_route.assert_called_once_with(52.41, 16.92, 52.4325844, 16.6989707, "cycling-regular")
+
+    @mock.patch("siteapp.views.geocode_address")
+    def test_unresolvable_address_returns_400(self, mock_geocode):
+        mock_geocode.return_value = None
+        response = self.client.get(
+            reverse("event_route", args=[self.event.slug]),
+            {"profile": "foot-walking", "start_address": "gdzieś nie istnieje"},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    @mock.patch("siteapp.views.get_route")
+    def test_route_failure_returns_502(self, mock_get_route):
+        mock_get_route.return_value = None
+        response = self.client.get(
+            reverse("event_route", args=[self.event.slug]),
+            {"profile": "foot-walking", "start_lat": "52.4", "start_lng": "16.9"},
+        )
+        self.assertEqual(response.status_code, 502)
+
+
 class EventTest(TestCase):
     def test_event_detail_by_slug(self):
         event = Event.objects.create(

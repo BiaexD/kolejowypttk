@@ -191,6 +191,71 @@ h1,h2,h3{color:var(--pttk-dark);margin:.6rem 0}
   z-index:1;
 }
 
+.route-planner{
+  margin-top:1.5rem;
+  padding:1.2rem;
+  background:#fbfffb;
+  border:1px solid #e6f3e6;
+  border-radius:12px;
+}
+
+.route-planner h3{
+  margin:0 0 .8rem;
+}
+
+.route-planner-modes{
+  display:flex;
+  gap:1.2rem;
+  flex-wrap:wrap;
+  margin-bottom:1rem;
+  font-weight:600;
+}
+
+.route-planner-modes label{
+  display:inline-flex;
+  align-items:center;
+  gap:.4rem;
+  cursor:pointer;
+}
+
+.route-manual{
+  margin-top:1rem;
+}
+
+.route-manual label{
+  display:block;
+  font-weight:700;
+  margin-bottom:.35rem;
+  color:var(--pttk-dark);
+}
+
+.route-manual-row{
+  display:flex;
+  gap:.6rem;
+  flex-wrap:wrap;
+}
+
+.route-manual-row input{
+  flex:1 1 240px;
+  padding:.65rem .85rem;
+  border:1px solid #e3e3e3;
+  border-radius:12px;
+  font:inherit;
+  background:#fff;
+}
+
+.route-manual-row input:focus{
+  outline:none;
+  border-color:var(--pttk-green);
+  box-shadow:0 0 0 3px rgba(28,124,61,.12);
+}
+
+.route-result{
+  margin:.8rem 0 0;
+  font-weight:700;
+  color:var(--pttk-green);
+}
+
 /* buttons (uniwersalne, poza hero) */
 .btn{
   display:inline-flex;
