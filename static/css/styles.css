@@ -1083,7 +1083,6 @@ a.news-card:hover h3{color:var(--pttk-green)}
 }
 
 .panel-form-card{
-  max-width:720px;
   background:#fff;
   border:1px solid #eee;
   border-radius:16px;
@@ -1134,6 +1133,70 @@ a.news-card:hover h3{color:var(--pttk-green)}
   border-radius:12px;
   padding:1.1rem 1.2rem;
   margin-top:.5rem;
+}
+
+/* Załączniki (zdjęcia + dokumenty razem) w oknie edycji */
+.field-hint{
+  margin:.4rem 0 0;
+  font-size:.85rem;
+  color:var(--muted);
+}
+
+.panel-attachment-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  gap:.8rem;
+  margin:.7rem 0 0;
+}
+
+.panel-attachment-item{
+  position:relative;
+  border-radius:10px;
+  overflow:hidden;
+  aspect-ratio:1/1;
+  background:#eee;
+}
+
+.panel-attachment-item img{width:100%; height:100%; object-fit:cover; display:block}
+
+.panel-attachment-item form{position:absolute; top:.35rem; right:.35rem}
+
+.panel-attachment-item button{
+  background:rgba(0,0,0,.6);
+  color:#fff;
+  border:none;
+  border-radius:999px;
+  width:30px;
+  height:30px;
+  cursor:pointer;
+  font-weight:700;
+  font-size:1rem;
+  line-height:1;
+}
+
+.panel-attachment-item button:hover{background:rgba(176,0,32,.85)}
+
+.panel-attachment-item.is-doc{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.4rem;
+  background:#f6fff6;
+  border:1px solid #e6f3e6;
+  padding:.6rem;
+  text-align:center;
+}
+
+.panel-attachment-item.is-doc .doc-icon-small{
+  color:var(--pttk-green);
+}
+
+.panel-attachment-item.is-doc span.filename{
+  font-size:.78rem;
+  color:var(--pttk-dark);
+  word-break:break-word;
+  line-height:1.2;
 }
 
 .panel-confirm{max-width:480px; margin:3rem auto; text-align:center}

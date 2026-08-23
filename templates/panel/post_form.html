@@ -5,7 +5,7 @@
 <h1>{% if object %}Edytuj aktualność{% else %}Nowa aktualność{% endif %}</h1>
 
 <div class="panel-form-card">
-  <form method="post" class="contact-form">
+  <form method="post" enctype="multipart/form-data" class="contact-form">
     {% csrf_token %}
     <div class="field">
       <label for="{{ form.title.id_for_label }}">Tytuł</label>
@@ -23,71 +23,47 @@
       {% if form.published_at.errors %}<div class="field-error">{{ form.published_at.errors }}</div>{% endif %}
     </div>
     {% if form.non_field_errors %}<div class="field-error">{{ form.non_field_errors }}</div>{% endif %}
+
+    <div class="field">
+      <label for="id_attachments">Załączniki (zdjęcia, dokumenty)</label>
+      <input type="file" name="attachments" id="id_attachments" multiple>
+      <p class="field-hint">{{ attachments_hint }}</p>
+    </div>
+
+    {% if photos or documents %}
+      <div class="field">
+        <label>Obecne załączniki</label>
+        <div class="panel-attachment-grid">
+          {% for photo in photos %}
+            <div class="panel-attachment-item">
+              <img src="{{ photo.image.url }}" alt="{{ photo.caption }}">
+              <form method="post" action="{% url 'panel_post_photo_delete' photo.pk %}" onsubmit="return confirm('Usunąć to zdjęcie?');">
+                {% csrf_token %}
+                <button type="submit" title="Usuń zdjęcie">×</button>
+              </form>
+            </div>
+          {% endfor %}
+          {% for doc in documents %}
+            <div class="panel-attachment-item is-doc">
+              <svg class="doc-icon-small" width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                <path d="M14 2v6h6" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+              </svg>
+              <span class="filename">{{ doc.title|default:doc.file.name }}</span>
+              <form method="post" action="{% url 'panel_post_document_delete' doc.pk %}" onsubmit="return confirm('Usunąć ten dokument?');">
+                {% csrf_token %}
+                <button type="submit" title="Usuń dokument">×</button>
+              </form>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
     <div class="form-actions">
       <button class="btn btn-primary" type="submit">Zapisz</button>
       <a href="{% url 'panel_post_list' %}" class="btn">Anuluj</a>
     </div>
   </form>
 </div>
-
-{% if object %}
-  <h2 style="margin-top:2rem">Zdjęcia</h2>
-  <div class="panel-photo-grid">
-    {% for photo in photos %}
-      <div class="panel-photo-item">
-        <img src="{{ photo.image.url }}" alt="{{ photo.caption }}">
-        <form method="post" action="{% url 'panel_post_photo_delete' photo.pk %}" onsubmit="return confirm('Usunąć to zdjęcie?');">
-          {% csrf_token %}
-          <button type="submit" title="Usuń zdjęcie">×</button>
-        </form>
-      </div>
-    {% empty %}
-      <p class="muted">Brak zdjęć.</p>
-    {% endfor %}
-  </div>
-
-  <form method="post" action="{% url 'panel_post_photo_add' object.pk %}" enctype="multipart/form-data" class="panel-photo-add">
-    {% csrf_token %}
-    <div class="field" style="margin:0">
-      <label for="{{ photo_form.image.id_for_label }}">Dodaj zdjęcie</label>
-      {{ photo_form.image }}
-    </div>
-    <div class="field" style="margin:0; flex:1">
-      <label for="{{ photo_form.caption.id_for_label }}">Podpis (opcjonalnie)</label>
-      {{ photo_form.caption }}
-    </div>
-    <button class="btn btn-primary" type="submit">Dodaj</button>
-  </form>
-
-  <h2 style="margin-top:2rem">Dokumenty</h2>
-  <div class="panel-list">
-    {% for doc in documents %}
-      <div class="panel-list-row">
-        <div class="panel-list-row-title">{{ doc.title|default:doc.file.name }}</div>
-        <div class="panel-list-actions">
-          <a href="{{ doc.file.url }}" target="_blank" rel="noopener" class="btn">Otwórz</a>
-          <form method="post" action="{% url 'panel_post_document_delete' doc.pk %}" onsubmit="return confirm('Usunąć ten dokument?');" style="display:inline">
-            {% csrf_token %}
-            <button type="submit" class="btn">Usuń</button>
-          </form>
-        </div>
-      </div>
-    {% empty %}
-      <p class="muted">Brak dokumentów.</p>
-    {% endfor %}
-  </div>
-
-  <form method="post" action="{% url 'panel_post_document_add' object.pk %}" enctype="multipart/form-data" class="panel-photo-add">
-    {% csrf_token %}
-    <div class="field" style="margin:0">
-      <label for="{{ document_form.file.id_for_label }}">Dodaj dokument</label>
-      {{ document_form.file }}
-    </div>
-    <div class="field" style="margin:0; flex:1">
-      <label for="{{ document_form.title.id_for_label }}">Nazwa (opcjonalnie)</label>
-      {{ document_form.title }}
-    </div>
-    <button class="btn btn-primary" type="submit">Dodaj</button>
-  </form>
-{% endif %}
 {% endblock %}

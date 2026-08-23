@@ -256,19 +256,33 @@ class PanelContentTest(TestCase):
         self.user = get_user_model().objects.create_user(username="editor", password="x", is_active=True)
         self.client.force_login(self.user)
 
+    def test_can_attach_photo_directly_when_creating_a_post(self):
+        create = self.client.post(reverse("panel_post_create"), {
+            "title": "Nowa aktualność",
+            "body": "Treść",
+            "published_at": "2026-08-23T10:00",
+            "attachments": [tiny_jpeg()],
+        })
+        post = Post.objects.get(title="Nowa aktualność")
+        self.assertRedirects(create, reverse("panel_post_edit", args=[post.pk]))
+        self.assertEqual(post.images.count(), 1)
+
     def test_create_edit_and_delete_post_with_photo(self):
         create = self.client.post(reverse("panel_post_create"), {
             "title": "Nowa aktualność",
             "body": "Treść",
             "published_at": "2026-08-23T10:00",
-            "is_published": "on",
         })
         post = Post.objects.get(title="Nowa aktualność")
         self.assertRedirects(create, reverse("panel_post_edit", args=[post.pk]))
 
         add_photo = self.client.post(
-            reverse("panel_post_photo_add", args=[post.pk]),
-            {"image": tiny_jpeg(), "caption": ""},
+            reverse("panel_post_edit", args=[post.pk]),
+            {
+                "title": post.title, "body": post.body,
+                "published_at": "2026-08-23T10:00",
+                "attachments": [tiny_jpeg()],
+            },
         )
         self.assertRedirects(add_photo, reverse("panel_post_edit", args=[post.pk]))
         self.assertEqual(post.images.count(), 1)
@@ -314,8 +328,12 @@ class PanelContentTest(TestCase):
     def test_can_attach_and_remove_document_on_post(self):
         post = Post.objects.create(title="Z dokumentem", body="x", published_at=timezone.now())
         add = self.client.post(
-            reverse("panel_post_document_add", args=[post.pk]),
-            {"file": SimpleUploadedFile("statut.pdf", b"%PDF-1.4 test", content_type="application/pdf"), "title": "Statut"},
+            reverse("panel_post_edit", args=[post.pk]),
+            {
+                "title": post.title, "body": post.body,
+                "published_at": "2026-08-23T10:00",
+                "attachments": [SimpleUploadedFile("statut.pdf", b"%PDF-1.4 test", content_type="application/pdf")],
+            },
         )
         self.assertRedirects(add, reverse("panel_post_edit", args=[post.pk]))
         self.assertEqual(post.documents.count(), 1)
@@ -323,6 +341,23 @@ class PanelContentTest(TestCase):
         doc = post.documents.first()
         self.client.post(reverse("panel_post_document_delete", args=[doc.pk]))
         self.assertEqual(post.documents.count(), 0)
+
+    def test_mixed_attachments_split_by_extension_and_reject_unknown(self):
+        post = Post.objects.create(title="Mieszane", body="x", published_at=timezone.now())
+        self.client.post(
+            reverse("panel_post_edit", args=[post.pk]),
+            {
+                "title": post.title, "body": post.body,
+                "published_at": "2026-08-23T10:00",
+                "attachments": [
+                    tiny_jpeg(),
+                    SimpleUploadedFile("regulamin.pdf", b"%PDF-1.4 x", content_type="application/pdf"),
+                    SimpleUploadedFile("virus.exe", b"x", content_type="application/octet-stream"),
+                ],
+            },
+        )
+        self.assertEqual(post.images.count(), 1)
+        self.assertEqual(post.documents.count(), 1)
 
     def test_event_list_splits_upcoming_and_past(self):
         upcoming = Event.objects.create(

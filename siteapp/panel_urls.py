@@ -15,9 +15,7 @@ urlpatterns = [
     path('aktualnosci/<int:pk>/usun/', views.PanelPostDeleteView.as_view(), name='panel_post_delete'),
     path('aktualnosci/<int:pk>/przywroc/', views.panel_post_restore, name='panel_post_restore'),
     path('aktualnosci/<int:pk>/usun-na-zawsze/', views.panel_post_purge, name='panel_post_purge'),
-    path('aktualnosci/<int:pk>/zdjecie/dodaj/', views.panel_post_photo_add, name='panel_post_photo_add'),
     path('aktualnosci/zdjecie/<int:pk>/usun/', views.panel_post_photo_delete, name='panel_post_photo_delete'),
-    path('aktualnosci/<int:pk>/dokument/dodaj/', views.panel_post_document_add, name='panel_post_document_add'),
     path('aktualnosci/dokument/<int:pk>/usun/', views.panel_post_document_delete, name='panel_post_document_delete'),
 
     path('wydarzenia/', views.panel_event_list, name='panel_event_list'),
@@ -27,9 +25,7 @@ urlpatterns = [
     path('wydarzenia/<int:pk>/usun/', views.PanelEventDeleteView.as_view(), name='panel_event_delete'),
     path('wydarzenia/<int:pk>/przywroc/', views.panel_event_restore, name='panel_event_restore'),
     path('wydarzenia/<int:pk>/usun-na-zawsze/', views.panel_event_purge, name='panel_event_purge'),
-    path('wydarzenia/<int:pk>/zdjecie/dodaj/', views.panel_event_photo_add, name='panel_event_photo_add'),
     path('wydarzenia/zdjecie/<int:pk>/usun/', views.panel_event_photo_delete, name='panel_event_photo_delete'),
-    path('wydarzenia/<int:pk>/dokument/dodaj/', views.panel_event_document_add, name='panel_event_document_add'),
     path('wydarzenia/dokument/<int:pk>/usun/', views.panel_event_document_delete, name='panel_event_document_delete'),
 
     path('wladze/', views.PanelPersonListView.as_view(), name='panel_person_list'),

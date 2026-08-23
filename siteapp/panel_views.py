@@ -16,10 +16,35 @@ from .models import (
 )
 from .panel_forms import (
     PanelSignupForm, PanelLoginForm,
-    PanelPostForm, PanelPostImageForm, PanelPostDocumentForm,
-    PanelEventForm, PanelEventPhotoForm, PanelEventDocumentForm,
+    PanelPostForm, PanelEventForm,
     PanelPersonForm, PanelDocumentForm, PanelHeroImageForm,
 )
+
+IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "gif", "webp"}
+DOCUMENT_EXTENSIONS = {"pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "odt"}
+ATTACHMENTS_HINT = "Dozwolone: JPG, PNG, GIF, WEBP (zdjęcia), PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, ODT (dokumenty)."
+
+
+def _file_extension(uploaded_file):
+    name = uploaded_file.name
+    return name.rsplit(".", 1)[-1].lower() if "." in name else ""
+
+
+def _save_attachments(request, files, image_model, doc_model, parent_field, parent_obj):
+    """Jedno pole 'Załączniki' w formularzu — rozdzielamy zdjęcia od dokumentów po rozszerzeniu."""
+    added_images = added_docs = 0
+    for f in files:
+        ext = _file_extension(f)
+        if ext in IMAGE_EXTENSIONS:
+            image_model.objects.create(**{parent_field: parent_obj, "image": f})
+            added_images += 1
+        elif ext in DOCUMENT_EXTENSIONS:
+            doc_model.objects.create(**{parent_field: parent_obj, "file": f, "title": f.name})
+            added_docs += 1
+        else:
+            messages.error(request, f"Pominięto plik „{f.name}” — nieobsługiwane rozszerzenie.")
+    if added_images or added_docs:
+        messages.success(request, f"Dodano załączniki: {added_images} zdjęć, {added_docs} dokumentów.")
 
 
 class PanelLoginView(LoginView):
@@ -115,8 +140,18 @@ class PanelPostCreateView(PanelBaseView, CreateView):
     form_class = PanelPostForm
     template_name = 'panel/post_form.html'
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['attachments_hint'] = ATTACHMENTS_HINT
+        return ctx
+
+    def form_valid(self, form):
+        self.object = form.save()
+        _save_attachments(self.request, self.request.FILES.getlist('attachments'), PostImage, PostDocument, 'post', self.object)
+        messages.success(self.request, "Aktualność dodana.")
+        return HttpResponseRedirect(self.get_success_url())
+
     def get_success_url(self):
-        messages.success(self.request, "Aktualność dodana. Możesz teraz dodać do niej zdjęcia i dokumenty.")
         return reverse('panel_post_edit', args=[self.object.pk])
 
 
@@ -127,14 +162,18 @@ class PanelPostUpdateView(PanelBaseView, UpdateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx['photo_form'] = PanelPostImageForm()
         ctx['photos'] = self.object.images.all()
-        ctx['document_form'] = PanelPostDocumentForm()
         ctx['documents'] = self.object.documents.all()
+        ctx['attachments_hint'] = ATTACHMENTS_HINT
         return ctx
 
-    def get_success_url(self):
+    def form_valid(self, form):
+        self.object = form.save()
+        _save_attachments(self.request, self.request.FILES.getlist('attachments'), PostImage, PostDocument, 'post', self.object)
         messages.success(self.request, "Zmiany zapisane.")
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
         return reverse('panel_post_edit', args=[self.object.pk])
 
 
@@ -160,21 +199,6 @@ def panel_post_purge(request, pk):
 
 
 @login_required
-def panel_post_photo_add(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    if request.method == 'POST':
-        form = PanelPostImageForm(request.POST, request.FILES)
-        if form.is_valid():
-            photo = form.save(commit=False)
-            photo.post = post
-            photo.save()
-            messages.success(request, "Zdjęcie dodane.")
-        else:
-            messages.error(request, "Nie udało się dodać zdjęcia — wybierz plik.")
-    return redirect('panel_post_edit', pk=post.pk)
-
-
-@login_required
 def panel_post_photo_delete(request, pk):
     photo = get_object_or_404(PostImage, pk=pk)
     post_pk = photo.post_id
@@ -183,21 +207,6 @@ def panel_post_photo_delete(request, pk):
         photo.delete()
         messages.success(request, "Zdjęcie usunięte.")
     return redirect('panel_post_edit', pk=post_pk)
-
-
-@login_required
-def panel_post_document_add(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    if request.method == 'POST':
-        form = PanelPostDocumentForm(request.POST, request.FILES)
-        if form.is_valid():
-            doc = form.save(commit=False)
-            doc.post = post
-            doc.save()
-            messages.success(request, "Dokument dodany.")
-        else:
-            messages.error(request, "Nie udało się dodać dokumentu — wybierz plik.")
-    return redirect('panel_post_edit', pk=post.pk)
 
 
 @login_required
@@ -232,6 +241,11 @@ class PanelEventCreateView(PanelBaseView, CreateView):
     form_class = PanelEventForm
     template_name = 'panel/event_form.html'
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['attachments_hint'] = ATTACHMENTS_HINT
+        return ctx
+
     def form_valid(self, form):
         base = slugify(form.instance.title)[:200] or 'wydarzenie'
         slug = base
@@ -240,10 +254,12 @@ class PanelEventCreateView(PanelBaseView, CreateView):
             slug = f"{base}-{i}"
             i += 1
         form.instance.slug = slug
-        return super().form_valid(form)
+        self.object = form.save()
+        _save_attachments(self.request, self.request.FILES.getlist('attachments'), EventPhoto, EventDocument, 'event', self.object)
+        messages.success(self.request, "Wydarzenie dodane.")
+        return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        messages.success(self.request, "Wydarzenie dodane. Możesz teraz dodać do niego zdjęcia i dokumenty.")
         return reverse('panel_event_edit', args=[self.object.pk])
 
 
@@ -254,14 +270,18 @@ class PanelEventUpdateView(PanelBaseView, UpdateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx['photo_form'] = PanelEventPhotoForm()
         ctx['photos'] = self.object.photos.all()
-        ctx['document_form'] = PanelEventDocumentForm()
         ctx['documents'] = self.object.documents.all()
+        ctx['attachments_hint'] = ATTACHMENTS_HINT
         return ctx
 
-    def get_success_url(self):
+    def form_valid(self, form):
+        self.object = form.save()
+        _save_attachments(self.request, self.request.FILES.getlist('attachments'), EventPhoto, EventDocument, 'event', self.object)
         messages.success(self.request, "Zmiany zapisane.")
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
         return reverse('panel_event_edit', args=[self.object.pk])
 
 
@@ -287,21 +307,6 @@ def panel_event_purge(request, pk):
 
 
 @login_required
-def panel_event_photo_add(request, pk):
-    event = get_object_or_404(Event, pk=pk)
-    if request.method == 'POST':
-        form = PanelEventPhotoForm(request.POST, request.FILES)
-        if form.is_valid():
-            photo = form.save(commit=False)
-            photo.event = event
-            photo.save()
-            messages.success(request, "Zdjęcie dodane.")
-        else:
-            messages.error(request, "Nie udało się dodać zdjęcia — wybierz plik.")
-    return redirect('panel_event_edit', pk=event.pk)
-
-
-@login_required
 def panel_event_photo_delete(request, pk):
     photo = get_object_or_404(EventPhoto, pk=pk)
     event_pk = photo.event_id
@@ -310,21 +315,6 @@ def panel_event_photo_delete(request, pk):
         photo.delete()
         messages.success(request, "Zdjęcie usunięte.")
     return redirect('panel_event_edit', pk=event_pk)
-
-
-@login_required
-def panel_event_document_add(request, pk):
-    event = get_object_or_404(Event, pk=pk)
-    if request.method == 'POST':
-        form = PanelEventDocumentForm(request.POST, request.FILES)
-        if form.is_valid():
-            doc = form.save(commit=False)
-            doc.event = event
-            doc.save()
-            messages.success(request, "Dokument dodany.")
-        else:
-            messages.error(request, "Nie udało się dodać dokumentu — wybierz plik.")
-    return redirect('panel_event_edit', pk=event.pk)
 
 
 @login_required

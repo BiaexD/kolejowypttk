@@ -2,10 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import AuthenticationForm
 
-from .models import (
-    Post, PostImage, PostDocument, Event, EventPhoto, EventDocument,
-    Person, Document, HeroImage,
-)
+from .models import Post, Event, Person, Document, HeroImage
 
 User = get_user_model()
 
@@ -81,18 +78,6 @@ class PanelPostForm(forms.ModelForm):
         }
 
 
-class PanelPostImageForm(forms.ModelForm):
-    class Meta:
-        model = PostImage
-        fields = ['image', 'caption']
-
-
-class PanelPostDocumentForm(forms.ModelForm):
-    class Meta:
-        model = PostDocument
-        fields = ['file', 'title']
-
-
 class PanelEventForm(forms.ModelForm):
     class Meta:
         model = Event
@@ -102,18 +87,6 @@ class PanelEventForm(forms.ModelForm):
             'end_date': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
             'description': forms.Textarea(attrs={'rows': 8}),
         }
-
-
-class PanelEventPhotoForm(forms.ModelForm):
-    class Meta:
-        model = EventPhoto
-        fields = ['image', 'caption']
-
-
-class PanelEventDocumentForm(forms.ModelForm):
-    class Meta:
-        model = EventDocument
-        fields = ['file', 'title']
 
 
 class PanelPersonForm(forms.ModelForm):
