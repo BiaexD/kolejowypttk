@@ -3,7 +3,7 @@
 
 {% block title %}{{ item.title }} - Wydarzenia{% endblock %}
 
-{% if item.location_lat %}
+{% if item.location_lat or item.end_location_lat %}
 {% block extra_head %}
   <link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">
 {% endblock %}
@@ -18,10 +18,20 @@
     {% if item.end_date %} – {{ item.end_date|date:'d.m.Y' }}{% if item.end_time %}, {{ item.end_time|time:'H:i' }}{% endif %}{% endif %}
   </p>
   {% if item.location or item.end_location %}
-    <p class="event-meta-place">
-      {% if item.location %}<strong>Start:</strong> {{ item.location }}{% endif %}
-      {% if item.end_location %}{% if item.location %} &nbsp;•&nbsp; {% endif %}<strong>Meta:</strong> {{ item.end_location }}{% endif %}
-    </p>
+    <div class="event-places">
+      {% if item.location %}
+        <div class="event-place event-place-start">
+          <span class="event-place-label">Start</span>
+          <span class="event-place-value">{{ item.location }}</span>
+        </div>
+      {% endif %}
+      {% if item.end_location %}
+        <div class="event-place event-place-end">
+          <span class="event-place-label">Meta</span>
+          <span class="event-place-value">{{ item.end_location }}</span>
+        </div>
+      {% endif %}
+    </div>
   {% endif %}
 
   {% if item.cover_url and not item.photos.all %}
@@ -30,12 +40,30 @@
 
   <div class="prose">{{ item.description|linebreaks }}</div>
 
-  {% if item.location_lat %}
+  {% if item.location_lat or item.end_location_lat %}
     <h2>Gdzie to jest</h2>
-    <div id="event-map" class="event-map" data-lat="{{ item.location_lat|unlocalize }}" data-lng="{{ item.location_lng|unlocalize }}" data-title="{{ item.title }}"></div>
-    <p class="field-hint">Warstwę szlaków (piesze / rowerowe) przełączysz przyciskiem w prawym górnym rogu mapy. Kolor linii to prawdziwy kolor oznaczenia danego szlaku (żółty, czerwony, niebieski, zielony, czarny) — tak jak na słupkach i drzewach, nie jest to kod pieszy/rowerowy. Więcej o szlaku: <a href="https://waymarkedtrails.org/#hiking?map=13!{{ item.location_lat|unlocalize }}!{{ item.location_lng|unlocalize }}" target="_blank" rel="noopener">zobacz na Waymarked Trails</a>.</p>
-    <a href="{{ item.map_link_url }}" target="_blank" rel="noopener" class="contact-map-link">Powiększ mapę →</a>
+    <div
+      id="event-map"
+      class="event-map"
+      data-start-lat="{{ item.location_lat|unlocalize }}"
+      data-start-lng="{{ item.location_lng|unlocalize }}"
+      data-start-place="{{ item.location }}"
+      data-start-when="{{ item.start_date|date:'d.m.Y' }}{% if item.start_time %}, {{ item.start_time|time:'H:i' }}{% endif %}"
+      data-end-lat="{{ item.end_location_lat|unlocalize }}"
+      data-end-lng="{{ item.end_location_lng|unlocalize }}"
+      data-end-place="{{ item.end_location }}"
+      data-end-when="{% if item.end_date %}{{ item.end_date|date:'d.m.Y' }}{% if item.end_time %}, {{ item.end_time|time:'H:i' }}{% endif %}{% endif %}"
+    ></div>
+    <p class="field-hint">
+      {% if item.location_lat and item.end_location_lat %}<span class="event-place-label" style="background:#1c7c3d">Start</span> i <span class="event-place-label" style="background:#b5651d">Meta</span> są zaznaczone na mapie — kliknij znacznik, aby zobaczyć szczegóły.{% endif %}
+      Warstwę szlaków (piesze / rowerowe) przełączysz przyciskiem w prawym górnym rogu mapy. Kolor linii to prawdziwy kolor oznaczenia danego szlaku (żółty, czerwony, niebieski, zielony, czarny) — tak jak na słupkach i drzewach, nie jest to kod pieszy/rowerowy.
+      {% if item.location_lat %}Więcej o szlaku: <a href="https://waymarkedtrails.org/#hiking?map=13!{{ item.location_lat|unlocalize }}!{{ item.location_lng|unlocalize }}" target="_blank" rel="noopener">zobacz na Waymarked Trails</a>.{% endif %}
+    </p>
+    {% if item.location_lat %}<a href="{{ item.map_link_url }}" target="_blank" rel="noopener" class="contact-map-link">Powiększ mapę (start) →</a>{% endif %}
+    {% if item.end_location_lat %}<a href="{{ item.end_map_link_url }}" target="_blank" rel="noopener" class="contact-map-link">Powiększ mapę (meta) →</a>{% endif %}
+  {% endif %}
 
+  {% if item.location_lat %}
     <div class="route-planner">
       <h3>Jak dojechać?</h3>
       <div class="route-planner-modes" role="radiogroup" aria-label="Środek transportu">
@@ -88,28 +116,16 @@
   {% endif %}
 </article>
 
-{% if item.location_lat %}
+{% if item.location_lat or item.end_location_lat %}
 <script src="{% static 'vendor/leaflet/leaflet.js' %}"></script>
 <script>
 (function () {
   var el = document.getElementById('event-map');
   if (!el || typeof L === 'undefined') return;
 
-  var markerIcon = L.icon({
-    iconRetinaUrl: '{% static "vendor/leaflet/images/marker-icon-2x.png" %}',
-    iconUrl: '{% static "vendor/leaflet/images/marker-icon.png" %}',
-    shadowUrl: '{% static "vendor/leaflet/images/marker-shadow.png" %}',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-  });
+  var map = L.map(el);
 
-  var lat = parseFloat(el.dataset.lat);
-  var lng = parseFloat(el.dataset.lng);
-  var map = L.map(el).setView([lat, lng], 13);
-
-  var base = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
     maxZoom: 19
   }).addTo(map);
@@ -131,7 +147,61 @@
     'Szlaki rowerowe': cycling
   }, { collapsed: false }).addTo(map);
 
-  L.marker([lat, lng], {icon: markerIcon}).addTo(map).bindPopup(el.dataset.title);
+  function eventMarkerIcon(letter, color) {
+    return L.divIcon({
+      className: 'event-marker-icon',
+      html: '<span class="event-marker-pin" style="background:' + color + '"><span class="event-marker-letter">' + letter + '</span></span>',
+      iconSize: [30, 30],
+      iconAnchor: [15, 28],
+      popupAnchor: [0, -26]
+    });
+  }
+
+  function popupContent(label, place, when) {
+    var wrap = document.createElement('div');
+    var strong = document.createElement('strong');
+    strong.textContent = label;
+    wrap.appendChild(strong);
+    if (place) {
+      wrap.appendChild(document.createElement('br'));
+      wrap.appendChild(document.createTextNode(place));
+    }
+    if (when) {
+      wrap.appendChild(document.createElement('br'));
+      wrap.appendChild(document.createTextNode(when));
+    }
+    return wrap;
+  }
+
+  var bounds = [];
+
+  var startLat = parseFloat(el.dataset.startLat);
+  var startLng = parseFloat(el.dataset.startLng);
+  var hasStart = !isNaN(startLat) && !isNaN(startLng);
+  if (hasStart) {
+    L.marker([startLat, startLng], { icon: eventMarkerIcon('S', '#1c7c3d') })
+      .addTo(map)
+      .bindPopup(popupContent('Start', el.dataset.startPlace, el.dataset.startWhen));
+    bounds.push([startLat, startLng]);
+  }
+
+  var endLat = parseFloat(el.dataset.endLat);
+  var endLng = parseFloat(el.dataset.endLng);
+  var hasEnd = !isNaN(endLat) && !isNaN(endLng);
+  if (hasEnd) {
+    L.marker([endLat, endLng], { icon: eventMarkerIcon('M', '#b5651d') })
+      .addTo(map)
+      .bindPopup(popupContent('Meta', el.dataset.endPlace, el.dataset.endWhen));
+    bounds.push([endLat, endLng]);
+  }
+
+  if (bounds.length === 2) {
+    map.fitBounds(bounds, { padding: [50, 50] });
+  } else if (bounds.length === 1) {
+    map.setView(bounds[0], 13);
+  }
+
+  if (!hasStart) return;
 
   var routeLayer = null;
   var statusEl = document.getElementById('route-status');
@@ -166,7 +236,7 @@
         if (routeLayer) {
           map.removeLayer(routeLayer);
         }
-        routeLayer = L.polyline(res.data.geometry, { color: '#1c7c3d', weight: 5, opacity: 0.85 }).addTo(map);
+        routeLayer = L.polyline(res.data.geometry, { color: '#2980b9', weight: 5, opacity: 0.85 }).addTo(map);
         map.fitBounds(routeLayer.getBounds(), { padding: [30, 30] });
 
         statusEl.hidden = true;

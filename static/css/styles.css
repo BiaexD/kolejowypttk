@@ -183,12 +183,31 @@ h1,h2,h3{color:var(--pttk-dark);margin:.6rem 0}
 .contact-map-link:hover{text-decoration:underline}
 
 .event-map{
-  height:380px;
+  height:420px;
   border-radius:12px;
   overflow:hidden;
   border:1px solid #e6f3e6;
   margin-top:1rem;
   z-index:1;
+}
+
+.event-marker-pin{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:30px;
+  height:30px;
+  border-radius:50% 50% 50% 0;
+  transform:rotate(-45deg);
+  box-shadow:0 2px 6px rgba(0,0,0,.4);
+  border:2px solid #fff;
+}
+
+.event-marker-letter{
+  transform:rotate(45deg);
+  color:#fff;
+  font-weight:800;
+  font-size:.8rem;
 }
 
 .route-planner{
@@ -465,8 +484,43 @@ a.news-card:hover h3{color:var(--pttk-green)}
 
 .event-info h2{margin:0 0 .25rem;font-size:1.1rem;color:var(--pttk-dark)}
 .event-meta{margin:0;color:var(--muted);font-size:.9rem}
-.event-meta-place{margin:.3rem 0 0;color:var(--muted);font-size:.9rem}
-.event-meta-place strong{color:var(--pttk-dark)}
+.event-places{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.6rem;
+  margin:.9rem 0 0;
+}
+
+.event-place{
+  display:inline-flex;
+  align-items:center;
+  gap:.55rem;
+  padding:.5rem .9rem .5rem .6rem;
+  border-radius:10px;
+  background:#f4f9f4;
+  border:1px solid #e0ede0;
+}
+
+.event-place-label{
+  display:inline-block;
+  font-size:.72rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  padding:.2rem .55rem;
+  border-radius:999px;
+  color:#fff;
+  background:var(--pttk-green);
+  line-height:1.4;
+}
+
+.event-place-end .event-place-label{background:#b5651d}
+
+.event-place-value{
+  font-weight:700;
+  color:var(--pttk-dark);
+  font-size:1rem;
+}
 
 /* Dokumenty — lista wierszy */
 .doc-list{

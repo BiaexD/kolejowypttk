@@ -124,6 +124,8 @@ class Event(TimeStamped, Trashable):
     location_lat = models.FloatField(null=True, blank=True, verbose_name="Miejsce — szerokość geogr.")
     location_lng = models.FloatField(null=True, blank=True, verbose_name="Miejsce — długość geogr.")
     end_location = models.CharField(max_length=200, blank=True, verbose_name="Miejsce zakończenia")
+    end_location_lat = models.FloatField(null=True, blank=True, verbose_name="Miejsce zakończenia — szerokość geogr.")
+    end_location_lng = models.FloatField(null=True, blank=True, verbose_name="Miejsce zakończenia — długość geogr.")
     cover_url = models.URLField(blank=True, verbose_name="Zdjęcie okładkowe (stary URL, zaawansowane)")
     is_published = models.BooleanField(default=True, verbose_name="Opublikowane")
 
@@ -148,6 +150,14 @@ class Event(TimeStamped, Trashable):
         return (
             f"https://www.openstreetmap.org/?mlat={self.location_lat}&mlon={self.location_lng}"
             f"#map=16/{self.location_lat}/{self.location_lng}"
+        )
+
+    def end_map_link_url(self):
+        if self.end_location_lat is None or self.end_location_lng is None:
+            return None
+        return (
+            f"https://www.openstreetmap.org/?mlat={self.end_location_lat}&mlon={self.end_location_lng}"
+            f"#map=16/{self.end_location_lat}/{self.end_location_lng}"
         )
 
 

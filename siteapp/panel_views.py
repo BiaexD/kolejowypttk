@@ -1,3 +1,5 @@
+import time
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -237,6 +239,28 @@ def panel_event_list(request):
     return render(request, 'panel/event_list.html', {'upcoming': upcoming, 'past': past})
 
 
+def _geocode_event_place(request, obj, field, lat_field, lng_field, label):
+    """Geokoduje pole tekstowe adresu wydarzenia i zapisuje wynik w lat/lng, albo je czyści."""
+    value = getattr(obj, field)
+    if not value:
+        setattr(obj, lat_field, None)
+        setattr(obj, lng_field, None)
+        return
+
+    coords = geocode_address(value)
+    if coords:
+        setattr(obj, lat_field, coords[0])
+        setattr(obj, lng_field, coords[1])
+    else:
+        setattr(obj, lat_field, None)
+        setattr(obj, lng_field, None)
+        messages.warning(
+            request,
+            f"Nie udało się automatycznie zlokalizować adresu ({label}) — mapa nie pojawi się na "
+            "stronie wydarzenia. Spróbuj podać dokładniejszy adres (ulica, numer, miejscowość).",
+        )
+
+
 class PanelEventCreateView(PanelBaseView, CreateView):
     model = Event
     form_class = PanelEventForm
@@ -256,16 +280,13 @@ class PanelEventCreateView(PanelBaseView, CreateView):
             i += 1
         form.instance.slug = slug
         self.object = form.save(commit=False)
-        if self.object.location:
-            coords = geocode_address(self.object.location)
-            if coords:
-                self.object.location_lat, self.object.location_lng = coords
-            else:
-                messages.warning(
-                    self.request,
-                    "Nie udało się automatycznie zlokalizować tego adresu — mapa nie pojawi się na "
-                    "stronie wydarzenia. Spróbuj podać dokładniejszy adres (ulica, numer, miejscowość).",
-                )
+        _geocode_event_place(self.request, self.object, 'location', 'location_lat', 'location_lng', 'miejsce rozpoczęcia')
+        if self.object.end_location and self.object.end_location.strip().lower() != (self.object.location or '').strip().lower():
+            time.sleep(1)  # Nominatim: max 1 zapytanie/s, unikamy blokady drugiego wywołania w tym samym żądaniu
+            _geocode_event_place(self.request, self.object, 'end_location', 'end_location_lat', 'end_location_lng', 'miejsce zakończenia')
+        else:
+            self.object.end_location_lat = None
+            self.object.end_location_lng = None
         self.object.save()
         _save_attachments(self.request, self.request.FILES.getlist('attachments'), EventPhoto, EventDocument, 'event', self.object)
         messages.success(self.request, "Wydarzenie dodane.")
@@ -289,23 +310,30 @@ class PanelEventUpdateView(PanelBaseView, UpdateView):
 
     def form_valid(self, form):
         location_changed = 'location' in form.changed_data
+        end_location_changed = 'end_location' in form.changed_data
         self.object = form.save(commit=False)
-        if location_changed:
-            if self.object.location:
-                coords = geocode_address(self.object.location)
-                if coords:
-                    self.object.location_lat, self.object.location_lng = coords
-                else:
-                    self.object.location_lat = None
-                    self.object.location_lng = None
-                    messages.warning(
-                        self.request,
-                        "Nie udało się automatycznie zlokalizować nowego adresu — mapa zniknie ze "
-                        "strony wydarzenia. Spróbuj podać dokładniejszy adres (ulica, numer, miejscowość).",
-                    )
-            else:
-                self.object.location_lat = None
-                self.object.location_lng = None
+
+        # Geokodujemy też wtedy, gdy tekst się nie zmienił, ale poprzednia próba
+        # nie powiodła się (np. przez limit zapytań Nominatim) — inaczej trwale
+        # zabrakłoby mapy, dopóki ktoś ręcznie nie zmieniłby adresu.
+        location_needs_geocode = bool(self.object.location) and (location_changed or self.object.location_lat is None)
+        if location_needs_geocode:
+            _geocode_event_place(self.request, self.object, 'location', 'location_lat', 'location_lng', 'miejsce rozpoczęcia')
+        elif not self.object.location:
+            self.object.location_lat = None
+            self.object.location_lng = None
+
+        end_location_is_distinct = bool(self.object.end_location) and self.object.end_location.strip().lower() != (self.object.location or '').strip().lower()
+        if end_location_is_distinct:
+            end_location_needs_geocode = location_changed or end_location_changed or self.object.end_location_lat is None
+            if end_location_needs_geocode:
+                if location_needs_geocode:
+                    time.sleep(1)  # Nominatim: max 1 zapytanie/s, unikamy blokady drugiego wywołania w tym samym żądaniu
+                _geocode_event_place(self.request, self.object, 'end_location', 'end_location_lat', 'end_location_lng', 'miejsce zakończenia')
+        else:
+            self.object.end_location_lat = None
+            self.object.end_location_lng = None
+
         self.object.save()
         _save_attachments(self.request, self.request.FILES.getlist('attachments'), EventPhoto, EventDocument, 'event', self.object)
         messages.success(self.request, "Zmiany zapisane.")

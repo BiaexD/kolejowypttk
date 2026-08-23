@@ -293,9 +293,9 @@ class EventTest(TestCase):
             location="Poznańska 10, Lusowo", location_lat=52.4325844, location_lng=16.6989707,
         )
         response = self.client.get(event.get_absolute_url())
-        self.assertContains(response, 'data-lat="52.4325844"')
-        self.assertContains(response, 'data-lng="16.6989707"')
-        self.assertNotContains(response, 'data-lat="52,4325844"')
+        self.assertContains(response, 'data-start-lat="52.4325844"')
+        self.assertContains(response, 'data-start-lng="16.6989707"')
+        self.assertNotContains(response, 'data-start-lat="52,4325844"')
 
     def test_start_and_end_time_and_place_shown_on_detail_page(self):
         event = Event.objects.create(
@@ -624,6 +624,95 @@ class PanelContentTest(TestCase):
             "location": "Poznań, Stary Rynek",
         })
         mock_geocode.assert_not_called()
+
+    @mock.patch("siteapp.panel_views.geocode_address")
+    def test_end_location_is_geocoded_when_different_from_start(self, mock_geocode):
+        mock_geocode.side_effect = [(52.4082, 16.9335), (52.2, 16.6)]
+        self.client.post(reverse("panel_event_create"), {
+            "title": "Rajd z metą", "description": "Opis", "start_date": "2026-09-01",
+            "location": "Poznań, Stary Rynek", "end_location": "Puszczykowo, Rynek",
+        })
+        event = Event.objects.get(title="Rajd z metą")
+        self.assertAlmostEqual(event.location_lat, 52.4082)
+        self.assertAlmostEqual(event.end_location_lat, 52.2)
+        self.assertAlmostEqual(event.end_location_lng, 16.6)
+
+    @mock.patch("siteapp.panel_views.geocode_address")
+    def test_end_location_not_geocoded_when_same_as_start(self, mock_geocode):
+        mock_geocode.return_value = (52.4082, 16.9335)
+        self.client.post(reverse("panel_event_create"), {
+            "title": "Rajd bez mety", "description": "Opis", "start_date": "2026-09-01",
+            "location": "Poznań, Stary Rynek", "end_location": "Poznań, Stary Rynek",
+        })
+        event = Event.objects.get(title="Rajd bez mety")
+        mock_geocode.assert_called_once_with("Poznań, Stary Rynek")
+        self.assertIsNone(event.end_location_lat)
+
+    @mock.patch("siteapp.panel_views.geocode_address")
+    def test_both_markers_present_on_single_map_when_end_location_geocoded(self, mock_geocode):
+        mock_geocode.side_effect = [(52.4082, 16.9335), (52.2, 16.6)]
+        self.client.post(reverse("panel_event_create"), {
+            "title": "Rajd z dwoma znacznikami", "description": "Opis", "start_date": "2026-09-01",
+            "location": "Poznań, Stary Rynek", "end_location": "Puszczykowo, Rynek",
+        })
+        event = Event.objects.get(title="Rajd z dwoma znacznikami")
+        response = self.client.get(event.get_absolute_url())
+        self.assertContains(response, 'id="event-map"')
+        self.assertContains(response, 'data-start-lat="52.4082"')
+        self.assertContains(response, 'data-end-lat="52.2"')
+
+    def test_map_marker_data_carries_place_and_datetime_for_popups(self):
+        event = Event.objects.create(
+            title="Rajd z popupami", slug="rajd-z-popupami", description="Opis",
+            start_date=timezone.now().date(), start_time=time(9, 0),
+            end_date=timezone.now().date(), end_time=time(16, 30),
+            location="Dworzec Poznań Główny", location_lat=52.4013, location_lng=16.9016,
+            end_location="Rynek w Puszczykowie", end_location_lat=52.2778, end_location_lng=16.8547,
+        )
+        response = self.client.get(event.get_absolute_url())
+        self.assertContains(response, 'data-start-place="Dworzec Poznań Główny"')
+        self.assertContains(response, 'data-end-place="Rynek w Puszczykowie"')
+        self.assertContains(response, 'data-end-when="')
+        self.assertContains(response, "16:30")
+
+    @mock.patch("siteapp.panel_views.geocode_address")
+    def test_editing_end_location_only_regeocodes_when_text_changes(self, mock_geocode):
+        mock_geocode.side_effect = [(52.4082, 16.9335), (52.2, 16.6)]
+        self.client.post(reverse("panel_event_create"), {
+            "title": "Rajd edytowalny", "description": "Opis", "start_date": "2026-09-01",
+            "location": "Poznań, Stary Rynek", "end_location": "Puszczykowo, Rynek",
+        })
+        event = Event.objects.get(title="Rajd edytowalny")
+
+        mock_geocode.reset_mock()
+        self.client.post(reverse("panel_event_edit", args=[event.pk]), {
+            "title": "Rajd edytowalny (zmieniony)", "description": "Opis", "start_date": "2026-09-01",
+            "location": "Poznań, Stary Rynek", "end_location": "Puszczykowo, Rynek",
+        })
+        mock_geocode.assert_not_called()
+
+    @mock.patch("siteapp.panel_views.geocode_address")
+    def test_editing_retries_geocode_when_previous_attempt_failed_even_without_text_change(self, mock_geocode):
+        # Regression: Nominatim rate-limiting silently left end_location_lat empty even
+        # though the address text was saved. Re-saving the form with the same text must
+        # retry, not require the editor to retype the address to force a change.
+        mock_geocode.side_effect = [(52.4082, 16.9335), None]
+        self.client.post(reverse("panel_event_create"), {
+            "title": "Rajd z awarią", "description": "Opis", "start_date": "2026-09-01",
+            "location": "Poznań, Stary Rynek", "end_location": "Puszczykowo, Rynek",
+        })
+        event = Event.objects.get(title="Rajd z awarią")
+        self.assertIsNone(event.end_location_lat)
+
+        mock_geocode.reset_mock(side_effect=True)
+        mock_geocode.return_value = (52.2, 16.6)
+        self.client.post(reverse("panel_event_edit", args=[event.pk]), {
+            "title": "Rajd z awarią", "description": "Opis", "start_date": "2026-09-01",
+            "location": "Poznań, Stary Rynek", "end_location": "Puszczykowo, Rynek",
+        })
+        event.refresh_from_db()
+        mock_geocode.assert_called_once_with("Puszczykowo, Rynek")
+        self.assertAlmostEqual(event.end_location_lat, 52.2)
 
     @mock.patch("siteapp.panel_views.geocode_address")
     def test_create_event_saves_start_and_end_time_and_place(self, mock_geocode):

@@ -49,6 +49,10 @@
     <div class="field">
       <label for="{{ form.end_location.id_for_label }}">Miejsce zakończenia (opcjonalnie)</label>
       {{ form.end_location }}
+      <p class="field-hint">
+        Wypełnij tylko, jeśli trasa kończy się gdzie indziej niż zaczyna — wtedy na stronie wydarzenia
+        pojawi się osobna mapa dla miejsca zakończenia.
+      </p>
     </div>
     {% if form.non_field_errors %}<div class="field-error">{{ form.non_field_errors }}</div>{% endif %}
 
