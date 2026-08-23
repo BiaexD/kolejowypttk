@@ -4,18 +4,21 @@
 {% block content %}
 <div class="panel-list-header">
   <h1>Wydarzenia</h1>
-  <a href="{% url 'panel_event_create' %}" class="btn btn-primary">+ Dodaj wydarzenie</a>
+  <div class="panel-list-actions">
+    <a href="{% url 'panel_event_trash' %}" class="btn">Kosz</a>
+    <a href="{% url 'panel_event_create' %}" class="btn btn-primary">+ Dodaj wydarzenie</a>
+  </div>
 </div>
 
+<h2>Nadchodzące i trwające</h2>
 <div class="panel-list">
-  {% for event in events %}
+  {% for event in upcoming %}
     <div class="panel-list-row">
       <div>
         <div class="panel-list-row-title">{{ event.title }}</div>
         <div class="panel-list-row-meta">
           {{ event.start_date|date:'d.m.Y' }}{% if event.end_date %} – {{ event.end_date|date:'d.m.Y' }}{% endif %}
           {% if event.location %} • {{ event.location }}{% endif %}
-          {% if not event.is_published %} • niepublikowane{% endif %}
         </div>
       </div>
       <div class="panel-list-actions">
@@ -24,7 +27,28 @@
       </div>
     </div>
   {% empty %}
-    <div class="panel-empty">Brak wydarzeń. Kliknij „Dodaj wydarzenie”, żeby dodać pierwsze.</div>
+    <div class="panel-empty">Brak nadchodzących wydarzeń.</div>
+  {% endfor %}
+</div>
+
+<h2 style="margin-top:2rem">Minione</h2>
+<div class="panel-list">
+  {% for event in past %}
+    <div class="panel-list-row">
+      <div>
+        <div class="panel-list-row-title">{{ event.title }}</div>
+        <div class="panel-list-row-meta">
+          {{ event.start_date|date:'d.m.Y' }}{% if event.end_date %} – {{ event.end_date|date:'d.m.Y' }}{% endif %}
+          {% if event.location %} • {{ event.location }}{% endif %}
+        </div>
+      </div>
+      <div class="panel-list-actions">
+        <a href="{% url 'panel_event_edit' event.pk %}" class="btn">Edytuj</a>
+        <a href="{% url 'panel_event_delete' event.pk %}" class="btn">Usuń</a>
+      </div>
+    </div>
+  {% empty %}
+    <div class="panel-empty">Brak minionych wydarzeń.</div>
   {% endfor %}
 </div>
 {% endblock %}

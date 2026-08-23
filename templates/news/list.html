@@ -26,25 +26,45 @@
 
   <div class="news-grid news-grid-row">
   {% for item in own_page %}
-    <article class="news-card">
-      <a href="{% url 'news_detail' item.pk %}" class="news-card-media">
-        {% with first=item.images.first %}
-          {% if first %}
-            <img src="{{ first.image.url }}" alt="{{ first.caption|default:item.title }}" loading="lazy">
-          {% elif item.image_url %}
-            <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy">
-          {% else %}
-            <div class="news-card-media-placeholder"></div>
-          {% endif %}
-        {% endwith %}
-      </a>
-      <div class="news-card-body">
-        <time class="news-card-date">{{ item.published_at|date:'d.m.Y' }}</time>
-        <h3><a href="{% url 'news_detail' item.pk %}">{{ item.title|default:"Aktualność" }}</a></h3>
-        <p>{{ item.body|truncatewords:20 }}</p>
-        <a class="news-card-more" href="{% url 'news_detail' item.pk %}">Czytaj więcej →</a>
-      </div>
-    </article>
+    {% if item.start_date %}
+      <article class="news-card">
+        <a href="{{ item.get_absolute_url }}" class="news-card-media">
+          {% with cover=item.cover_photo %}
+            {% if cover %}
+              <img src="{{ cover }}" alt="{{ item.title }}" loading="lazy">
+            {% else %}
+              <div class="news-card-media-placeholder"></div>
+            {% endif %}
+          {% endwith %}
+        </a>
+        <div class="news-card-body">
+          <time class="news-card-date">Wydarzenie: {{ item.start_date|date:'d.m.Y' }}</time>
+          <h3><a href="{{ item.get_absolute_url }}">{{ item.title }}</a></h3>
+          <p>{{ item.description|truncatewords:20 }}</p>
+          <a class="news-card-more" href="{{ item.get_absolute_url }}">Zobacz wydarzenie →</a>
+        </div>
+      </article>
+    {% else %}
+      <article class="news-card">
+        <a href="{% url 'news_detail' item.pk %}" class="news-card-media">
+          {% with first=item.images.first %}
+            {% if first %}
+              <img src="{{ first.image.url }}" alt="{{ first.caption|default:item.title }}" loading="lazy">
+            {% elif item.image_url %}
+              <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy">
+            {% else %}
+              <div class="news-card-media-placeholder"></div>
+            {% endif %}
+          {% endwith %}
+        </a>
+        <div class="news-card-body">
+          <time class="news-card-date">{{ item.published_at|date:'d.m.Y' }}</time>
+          <h3><a href="{% url 'news_detail' item.pk %}">{{ item.title|default:"Aktualność" }}</a></h3>
+          <p>{{ item.body|truncatewords:20 }}</p>
+          <a class="news-card-more" href="{% url 'news_detail' item.pk %}">Czytaj więcej →</a>
+        </div>
+      </article>
+    {% endif %}
   {% empty %}
     <p>Brak aktualności.</p>
   {% endfor %}

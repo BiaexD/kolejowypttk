@@ -1,9 +1,12 @@
+from datetime import time
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.contrib import messages
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.core.paginator import Paginator
+from django.db.models import Q
 from django.http import HttpResponse
 from .models import Post, PostImage, Event, Person, Document, HeroImage, CentralNews
 from .forms import ContactForm
@@ -17,7 +20,20 @@ def index(request):
     return render(request, 'index.html', {'news': news, 'hero': hero})
 
 def news_list(request):
-    own_items = Post.objects.filter(is_published=True).prefetch_related('images').order_by('-published_at')
+    today = timezone.now().date()
+    is_upcoming = Q(end_date__gte=today) | (Q(end_date__isnull=True) & Q(start_date__gte=today))
+
+    posts = list(Post.objects.filter(is_published=True).prefetch_related('images'))
+    upcoming_events = list(
+        Event.objects.filter(is_published=True).filter(is_upcoming).prefetch_related('photos')
+    )
+
+    def feed_date(item):
+        if isinstance(item, Event):
+            return timezone.make_aware(timezone.datetime.combine(item.start_date, time.min))
+        return item.published_at
+
+    own_items = sorted(posts + upcoming_events, key=feed_date, reverse=True)
     own_page = Paginator(own_items, 3).get_page(request.GET.get('own_page'))
 
     central_items = CentralNews.objects.all()

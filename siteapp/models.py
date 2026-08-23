@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 
 from .imaging import resize_and_compress
 
@@ -12,7 +13,37 @@ class TimeStamped(models.Model):
         abstract = True
 
 
-class Post(TimeStamped):
+class ActiveManager(models.Manager):
+    """Domyślny menedżer — pomija to, co jest w koszu."""
+
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
+
+class Trashable(models.Model):
+    """Miękkie usuwanie: 'Usuń' w panelu przenosi do kosza, nie kasuje od razu."""
+
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    objects = ActiveManager()
+    all_objects = models.Manager()
+
+    class Meta:
+        abstract = True
+
+    def soft_delete(self):
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        self.save(update_fields=['is_deleted', 'deleted_at'])
+
+    def restore(self):
+        self.is_deleted = False
+        self.deleted_at = None
+        self.save(update_fields=['is_deleted', 'deleted_at'])
+
+
+class Post(TimeStamped, Trashable):
     SOURCE_CHOICES = [
         ('MANUAL','Ręczny'),
         ('FACEBOOK','Facebook')
@@ -62,7 +93,26 @@ class PostImage(TimeStamped):
         return f"Zdjęcie do: {self.post}"
 
 
-class Event(TimeStamped):
+class PostDocument(TimeStamped):
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name="documents",
+        verbose_name="Aktualność",
+    )
+    file = models.FileField(upload_to="news_documents/", verbose_name="Plik")
+    title = models.CharField(max_length=200, blank=True, verbose_name="Nazwa")
+
+    class Meta:
+        ordering = ["id"]
+        verbose_name = "Dokument aktualności"
+        verbose_name_plural = "Dokumenty aktualności"
+
+    def __str__(self):
+        return self.title or f"Dokument do: {self.post}"
+
+
+class Event(TimeStamped, Trashable):
     title = models.CharField(max_length=200, verbose_name="Tytuł")
     slug = models.SlugField(max_length=220, unique=True, verbose_name="Slug (adres w URL)")
     description = models.TextField(verbose_name="Opis")
@@ -115,7 +165,26 @@ class EventPhoto(TimeStamped):
             EventPhoto.objects.filter(pk=self.pk).update(image=self.image.name)
 
 
-class Person(TimeStamped):
+class EventDocument(TimeStamped):
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name="documents",
+        verbose_name="Wydarzenie",
+    )
+    file = models.FileField(upload_to="event_documents/", verbose_name="Plik")
+    title = models.CharField(max_length=200, blank=True, verbose_name="Nazwa")
+
+    class Meta:
+        ordering = ["id"]
+        verbose_name = "Dokument wydarzenia"
+        verbose_name_plural = "Dokumenty wydarzenia"
+
+    def __str__(self):
+        return self.title or f"Dokument do: {self.event}"
+
+
+class Person(TimeStamped, Trashable):
     BODY_CHOICES = [
         ("zarzad", "Zarząd Oddziału"),
         ("sad", "Sąd Koleżeński Oddziału"),
@@ -176,7 +245,7 @@ class CentralNews(TimeStamped):
         return self.title
 
 
-class Document(TimeStamped):
+class Document(TimeStamped, Trashable):
     title = models.CharField(max_length=200, verbose_name="Tytuł")
     category = models.CharField(max_length=120, blank=True, verbose_name="Kategoria")
     file = models.FileField(upload_to="documents/", blank=True, verbose_name="Plik")
@@ -199,7 +268,7 @@ class Document(TimeStamped):
         return self.file.url if self.file else self.file_url
 
 
-class HeroImage(TimeStamped):
+class HeroImage(TimeStamped, Trashable):
     image = models.ImageField(upload_to="hero/", blank=True, verbose_name="Zdjęcie")
     image_url = models.CharField(
         max_length=255, blank=True,

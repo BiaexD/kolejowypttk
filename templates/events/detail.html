@@ -29,6 +29,26 @@
       {% endfor %}
     </div>
   {% endif %}
+
+  {% if item.documents.all %}
+    <h2>Dokumenty</h2>
+    <div class="doc-list">
+      {% for doc in item.documents.all %}
+        <a href="{{ doc.file.url }}" target="_blank" rel="noopener" class="doc-row">
+          <span class="doc-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+              <path d="M14 2v6h6" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="doc-info">
+            <span class="doc-title">{{ doc.title|default:doc.file.name }}</span>
+          </span>
+          <span class="doc-action">Otwórz →</span>
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
 </article>
 
 {% endblock %}

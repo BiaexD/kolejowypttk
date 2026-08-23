@@ -3,12 +3,22 @@
 
 {% block content %}
 <div class="panel-confirm">
-  <h1>Na pewno usunąć?</h1>
-  <p>„{{ label }}” zostanie usunięte bezpowrotnie.</p>
-  <form method="post">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-danger">Tak, usuń</button>
-    <a href="{{ back_url }}" class="btn">Anuluj</a>
-  </form>
+  {% if permanent %}
+    <h1>Usunąć na zawsze?</h1>
+    <p>„{{ label }}” zostanie usunięte trwale. Tej operacji nie da się cofnąć.</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Tak, usuń na zawsze</button>
+      <a href="{{ back_url }}" class="btn">Anuluj</a>
+    </form>
+  {% else %}
+    <h1>Przenieść do kosza?</h1>
+    <p>„{{ label }}” zniknie ze strony, ale będzie można je stamtąd przywrócić.</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary">Tak, przenieś do kosza</button>
+      <a href="{{ back_url }}" class="btn">Anuluj</a>
+    </form>
+  {% endif %}
 </div>
 {% endblock %}

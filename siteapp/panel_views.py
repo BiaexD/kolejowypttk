@@ -2,16 +2,22 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
+from django.db.models import Q
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
+from django.utils import timezone
 from django.utils.text import slugify
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 
-from .models import Post, PostImage, Event, EventPhoto, Person, Document, HeroImage
+from .models import (
+    Post, PostImage, PostDocument, Event, EventPhoto, EventDocument,
+    Person, Document, HeroImage,
+)
 from .panel_forms import (
     PanelSignupForm, PanelLoginForm,
-    PanelPostForm, PanelPostImageForm,
-    PanelEventForm, PanelEventPhotoForm,
+    PanelPostForm, PanelPostImageForm, PanelPostDocumentForm,
+    PanelEventForm, PanelEventPhotoForm, PanelEventDocumentForm,
     PanelPersonForm, PanelDocumentForm, PanelHeroImageForm,
 )
 
@@ -41,9 +47,58 @@ class PanelBaseView(LoginRequiredMixin):
     pass
 
 
+class SoftDeleteView(PanelBaseView, DeleteView):
+    """'Usuń' w panelu nigdy nie kasuje na stałe — przenosi do kosza."""
+    template_name = 'panel/confirm_delete.html'
+    list_url_name = None
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['back_url'] = reverse(self.list_url_name)
+        ctx['label'] = str(self.object)
+        return ctx
+
+    def form_valid(self, form):
+        success_url = self.get_success_url()
+        self.object.soft_delete()
+        return HttpResponseRedirect(success_url)
+
+
 @login_required
 def panel_dashboard(request):
     return render(request, 'panel/dashboard.html')
+
+
+# ---------- Kosz (wspólne dla wszystkich sekcji) ----------
+
+def _trash_list(request, model, section_title, list_url_name, restore_url_name, purge_url_name):
+    items = model.all_objects.filter(is_deleted=True).order_by('-deleted_at')
+    return render(request, 'panel/trash_list.html', {
+        'items': items,
+        'section_title': section_title,
+        'list_url': reverse(list_url_name),
+        'restore_url_name': restore_url_name,
+        'purge_url_name': purge_url_name,
+    })
+
+
+def _restore(request, model, pk, trash_url_name):
+    obj = get_object_or_404(model.all_objects, pk=pk)
+    if request.method == 'POST':
+        obj.restore()
+        messages.success(request, "Przywrócono.")
+    return redirect(trash_url_name)
+
+
+def _purge(request, model, pk, trash_url_name):
+    obj = get_object_or_404(model.all_objects, pk=pk)
+    if request.method == 'POST':
+        obj.delete()
+        messages.success(request, "Usunięto na zawsze.")
+        return redirect(trash_url_name)
+    return render(request, 'panel/confirm_delete.html', {
+        'label': str(obj), 'back_url': reverse(trash_url_name), 'permanent': True,
+    })
 
 
 # ---------- Aktualności ----------
@@ -61,7 +116,7 @@ class PanelPostCreateView(PanelBaseView, CreateView):
     template_name = 'panel/post_form.html'
 
     def get_success_url(self):
-        messages.success(self.request, "Aktualność dodana. Możesz teraz dodać do niej zdjęcia.")
+        messages.success(self.request, "Aktualność dodana. Możesz teraz dodać do niej zdjęcia i dokumenty.")
         return reverse('panel_post_edit', args=[self.object.pk])
 
 
@@ -74,6 +129,8 @@ class PanelPostUpdateView(PanelBaseView, UpdateView):
         ctx = super().get_context_data(**kwargs)
         ctx['photo_form'] = PanelPostImageForm()
         ctx['photos'] = self.object.images.all()
+        ctx['document_form'] = PanelPostDocumentForm()
+        ctx['documents'] = self.object.documents.all()
         return ctx
 
     def get_success_url(self):
@@ -81,16 +138,25 @@ class PanelPostUpdateView(PanelBaseView, UpdateView):
         return reverse('panel_post_edit', args=[self.object.pk])
 
 
-class PanelPostDeleteView(PanelBaseView, DeleteView):
+class PanelPostDeleteView(SoftDeleteView):
     model = Post
-    template_name = 'panel/confirm_delete.html'
     success_url = reverse_lazy('panel_post_list')
+    list_url_name = 'panel_post_list'
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx['back_url'] = reverse('panel_post_list')
-        ctx['label'] = str(self.object)
-        return ctx
+
+@login_required
+def panel_post_trash(request):
+    return _trash_list(request, Post, "Aktualności", 'panel_post_list', 'panel_post_restore', 'panel_post_purge')
+
+
+@login_required
+def panel_post_restore(request, pk):
+    return _restore(request, Post, pk, 'panel_post_trash')
+
+
+@login_required
+def panel_post_purge(request, pk):
+    return _purge(request, Post, pk, 'panel_post_trash')
 
 
 @login_required
@@ -119,13 +185,46 @@ def panel_post_photo_delete(request, pk):
     return redirect('panel_post_edit', pk=post_pk)
 
 
+@login_required
+def panel_post_document_add(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    if request.method == 'POST':
+        form = PanelPostDocumentForm(request.POST, request.FILES)
+        if form.is_valid():
+            doc = form.save(commit=False)
+            doc.post = post
+            doc.save()
+            messages.success(request, "Dokument dodany.")
+        else:
+            messages.error(request, "Nie udało się dodać dokumentu — wybierz plik.")
+    return redirect('panel_post_edit', pk=post.pk)
+
+
+@login_required
+def panel_post_document_delete(request, pk):
+    doc = get_object_or_404(PostDocument, pk=pk)
+    post_pk = doc.post_id
+    if request.method == 'POST':
+        doc.file.delete(save=False)
+        doc.delete()
+        messages.success(request, "Dokument usunięty.")
+    return redirect('panel_post_edit', pk=post_pk)
+
+
 # ---------- Wydarzenia ----------
 
-class PanelEventListView(PanelBaseView, ListView):
-    model = Event
-    template_name = 'panel/event_list.html'
-    context_object_name = 'events'
-    ordering = ['-start_date']
+def _event_time_split():
+    today = timezone.now().date()
+    is_past = Q(end_date__lt=today) | (Q(end_date__isnull=True) & Q(start_date__lt=today))
+    past = Event.objects.filter(is_past).order_by('-start_date')
+    upcoming = Event.objects.exclude(is_past).order_by('start_date')
+    return upcoming, past
+
+
+@login_required
+def panel_event_list(request):
+    upcoming, past = _event_time_split()
+    return render(request, 'panel/event_list.html', {'upcoming': upcoming, 'past': past})
 
 
 class PanelEventCreateView(PanelBaseView, CreateView):
@@ -144,7 +243,7 @@ class PanelEventCreateView(PanelBaseView, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        messages.success(self.request, "Wydarzenie dodane. Możesz teraz dodać do niego zdjęcia.")
+        messages.success(self.request, "Wydarzenie dodane. Możesz teraz dodać do niego zdjęcia i dokumenty.")
         return reverse('panel_event_edit', args=[self.object.pk])
 
 
@@ -157,6 +256,8 @@ class PanelEventUpdateView(PanelBaseView, UpdateView):
         ctx = super().get_context_data(**kwargs)
         ctx['photo_form'] = PanelEventPhotoForm()
         ctx['photos'] = self.object.photos.all()
+        ctx['document_form'] = PanelEventDocumentForm()
+        ctx['documents'] = self.object.documents.all()
         return ctx
 
     def get_success_url(self):
@@ -164,16 +265,25 @@ class PanelEventUpdateView(PanelBaseView, UpdateView):
         return reverse('panel_event_edit', args=[self.object.pk])
 
 
-class PanelEventDeleteView(PanelBaseView, DeleteView):
+class PanelEventDeleteView(SoftDeleteView):
     model = Event
-    template_name = 'panel/confirm_delete.html'
     success_url = reverse_lazy('panel_event_list')
+    list_url_name = 'panel_event_list'
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx['back_url'] = reverse('panel_event_list')
-        ctx['label'] = str(self.object)
-        return ctx
+
+@login_required
+def panel_event_trash(request):
+    return _trash_list(request, Event, "Wydarzenia", 'panel_event_list', 'panel_event_restore', 'panel_event_purge')
+
+
+@login_required
+def panel_event_restore(request, pk):
+    return _restore(request, Event, pk, 'panel_event_trash')
+
+
+@login_required
+def panel_event_purge(request, pk):
+    return _purge(request, Event, pk, 'panel_event_trash')
 
 
 @login_required
@@ -199,6 +309,32 @@ def panel_event_photo_delete(request, pk):
         photo.image.delete(save=False)
         photo.delete()
         messages.success(request, "Zdjęcie usunięte.")
+    return redirect('panel_event_edit', pk=event_pk)
+
+
+@login_required
+def panel_event_document_add(request, pk):
+    event = get_object_or_404(Event, pk=pk)
+    if request.method == 'POST':
+        form = PanelEventDocumentForm(request.POST, request.FILES)
+        if form.is_valid():
+            doc = form.save(commit=False)
+            doc.event = event
+            doc.save()
+            messages.success(request, "Dokument dodany.")
+        else:
+            messages.error(request, "Nie udało się dodać dokumentu — wybierz plik.")
+    return redirect('panel_event_edit', pk=event.pk)
+
+
+@login_required
+def panel_event_document_delete(request, pk):
+    doc = get_object_or_404(EventDocument, pk=pk)
+    event_pk = doc.event_id
+    if request.method == 'POST':
+        doc.file.delete(save=False)
+        doc.delete()
+        messages.success(request, "Dokument usunięty.")
     return redirect('panel_event_edit', pk=event_pk)
 
 
@@ -233,16 +369,25 @@ class PanelPersonUpdateView(PanelBaseView, UpdateView):
         return super().form_valid(form)
 
 
-class PanelPersonDeleteView(PanelBaseView, DeleteView):
+class PanelPersonDeleteView(SoftDeleteView):
     model = Person
-    template_name = 'panel/confirm_delete.html'
     success_url = reverse_lazy('panel_person_list')
+    list_url_name = 'panel_person_list'
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx['back_url'] = reverse('panel_person_list')
-        ctx['label'] = str(self.object)
-        return ctx
+
+@login_required
+def panel_person_trash(request):
+    return _trash_list(request, Person, "Władze", 'panel_person_list', 'panel_person_restore', 'panel_person_purge')
+
+
+@login_required
+def panel_person_restore(request, pk):
+    return _restore(request, Person, pk, 'panel_person_trash')
+
+
+@login_required
+def panel_person_purge(request, pk):
+    return _purge(request, Person, pk, 'panel_person_trash')
 
 
 # ---------- Dokumenty ----------
@@ -276,16 +421,25 @@ class PanelDocumentUpdateView(PanelBaseView, UpdateView):
         return super().form_valid(form)
 
 
-class PanelDocumentDeleteView(PanelBaseView, DeleteView):
+class PanelDocumentDeleteView(SoftDeleteView):
     model = Document
-    template_name = 'panel/confirm_delete.html'
     success_url = reverse_lazy('panel_document_list')
+    list_url_name = 'panel_document_list'
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx['back_url'] = reverse('panel_document_list')
-        ctx['label'] = str(self.object)
-        return ctx
+
+@login_required
+def panel_document_trash(request):
+    return _trash_list(request, Document, "Dokumenty", 'panel_document_list', 'panel_document_restore', 'panel_document_purge')
+
+
+@login_required
+def panel_document_restore(request, pk):
+    return _restore(request, Document, pk, 'panel_document_trash')
+
+
+@login_required
+def panel_document_purge(request, pk):
+    return _purge(request, Document, pk, 'panel_document_trash')
 
 
 # ---------- Hero ----------
@@ -319,13 +473,22 @@ class PanelHeroUpdateView(PanelBaseView, UpdateView):
         return super().form_valid(form)
 
 
-class PanelHeroDeleteView(PanelBaseView, DeleteView):
+class PanelHeroDeleteView(SoftDeleteView):
     model = HeroImage
-    template_name = 'panel/confirm_delete.html'
     success_url = reverse_lazy('panel_hero_list')
+    list_url_name = 'panel_hero_list'
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx['back_url'] = reverse('panel_hero_list')
-        ctx['label'] = str(self.object)
-        return ctx
+
+@login_required
+def panel_hero_trash(request):
+    return _trash_list(request, HeroImage, "Zdjęcie główne", 'panel_hero_list', 'panel_hero_restore', 'panel_hero_purge')
+
+
+@login_required
+def panel_hero_restore(request, pk):
+    return _restore(request, HeroImage, pk, 'panel_hero_trash')
+
+
+@login_required
+def panel_hero_purge(request, pk):
+    return _purge(request, HeroImage, pk, 'panel_hero_trash')

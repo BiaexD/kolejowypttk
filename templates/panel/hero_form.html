@@ -23,9 +23,6 @@
       <label for="{{ form.order.id_for_label }}">Kolejność (0 = pierwsze)</label>
       {{ form.order }}
     </div>
-    <div class="field">
-      <label><input type="checkbox" name="{{ form.is_active.html_name }}" {% if form.is_active.value %}checked{% endif %}> Aktywny</label>
-    </div>
     {% if form.non_field_errors %}<div class="field-error">{{ form.non_field_errors }}</div>{% endif %}
     <div class="form-actions">
       <button class="btn btn-primary" type="submit">Zapisz</button>

@@ -2,7 +2,10 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import AuthenticationForm
 
-from .models import Post, PostImage, Event, EventPhoto, Person, Document, HeroImage
+from .models import (
+    Post, PostImage, PostDocument, Event, EventPhoto, EventDocument,
+    Person, Document, HeroImage,
+)
 
 User = get_user_model()
 
@@ -71,7 +74,7 @@ class PanelLoginForm(AuthenticationForm):
 class PanelPostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['title', 'body', 'published_at', 'is_published']
+        fields = ['title', 'body', 'published_at']
         widgets = {
             'published_at': forms.DateTimeInput(attrs={'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
             'body': forms.Textarea(attrs={'rows': 8}),
@@ -84,10 +87,16 @@ class PanelPostImageForm(forms.ModelForm):
         fields = ['image', 'caption']
 
 
+class PanelPostDocumentForm(forms.ModelForm):
+    class Meta:
+        model = PostDocument
+        fields = ['file', 'title']
+
+
 class PanelEventForm(forms.ModelForm):
     class Meta:
         model = Event
-        fields = ['title', 'description', 'start_date', 'end_date', 'location', 'is_published']
+        fields = ['title', 'description', 'start_date', 'end_date', 'location']
         widgets = {
             'start_date': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
             'end_date': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
@@ -101,6 +110,12 @@ class PanelEventPhotoForm(forms.ModelForm):
         fields = ['image', 'caption']
 
 
+class PanelEventDocumentForm(forms.ModelForm):
+    class Meta:
+        model = EventDocument
+        fields = ['file', 'title']
+
+
 class PanelPersonForm(forms.ModelForm):
     class Meta:
         model = Person
@@ -110,7 +125,7 @@ class PanelPersonForm(forms.ModelForm):
 class PanelDocumentForm(forms.ModelForm):
     class Meta:
         model = Document
-        fields = ['title', 'category', 'file', 'is_public']
+        fields = ['title', 'category', 'file']
 
     def clean(self):
         cleaned = super().clean()
@@ -122,4 +137,4 @@ class PanelDocumentForm(forms.ModelForm):
 class PanelHeroImageForm(forms.ModelForm):
     class Meta:
         model = HeroImage
-        fields = ['image', 'title', 'is_active', 'order']
+        fields = ['image', 'title', 'order']

@@ -4,19 +4,19 @@
 {% block content %}
 <div class="panel-list-header">
   <h1>Zdjęcie główne (hero)</h1>
-  <a href="{% url 'panel_hero_create' %}" class="btn btn-primary">+ Dodaj slajd</a>
+  <div class="panel-list-actions">
+    <a href="{% url 'panel_hero_trash' %}" class="btn">Kosz</a>
+    <a href="{% url 'panel_hero_create' %}" class="btn btn-primary">+ Dodaj slajd</a>
+  </div>
 </div>
-<p class="muted">Na stronie głównej wyświetla się pierwszy aktywny slajd (najniższa „Kolejność”).</p>
+<p class="muted">Na stronie głównej wyświetla się pierwszy slajd (najniższa „Kolejność”).</p>
 
 <div class="panel-list">
   {% for slide in slides %}
     <div class="panel-list-row">
       <div>
         <div class="panel-list-row-title">{{ slide.title|default:"(bez tytułu)" }}</div>
-        <div class="panel-list-row-meta">
-          Kolejność: {{ slide.order }}
-          {% if not slide.is_active %} • nieaktywny{% endif %}
-        </div>
+        <div class="panel-list-row-meta">Kolejność: {{ slide.order }}</div>
       </div>
       <div class="panel-list-actions">
         <a href="{% url 'panel_hero_edit' slide.pk %}" class="btn">Edytuj</a>

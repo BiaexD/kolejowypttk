@@ -22,9 +22,6 @@
       {{ form.published_at }}
       {% if form.published_at.errors %}<div class="field-error">{{ form.published_at.errors }}</div>{% endif %}
     </div>
-    <div class="field">
-      <label><input type="checkbox" name="{{ form.is_published.html_name }}" {% if form.is_published.value %}checked{% endif %}> Opublikowana (widoczna na stronie)</label>
-    </div>
     {% if form.non_field_errors %}<div class="field-error">{{ form.non_field_errors }}</div>{% endif %}
     <div class="form-actions">
       <button class="btn btn-primary" type="submit">Zapisz</button>
@@ -58,6 +55,37 @@
     <div class="field" style="margin:0; flex:1">
       <label for="{{ photo_form.caption.id_for_label }}">Podpis (opcjonalnie)</label>
       {{ photo_form.caption }}
+    </div>
+    <button class="btn btn-primary" type="submit">Dodaj</button>
+  </form>
+
+  <h2 style="margin-top:2rem">Dokumenty</h2>
+  <div class="panel-list">
+    {% for doc in documents %}
+      <div class="panel-list-row">
+        <div class="panel-list-row-title">{{ doc.title|default:doc.file.name }}</div>
+        <div class="panel-list-actions">
+          <a href="{{ doc.file.url }}" target="_blank" rel="noopener" class="btn">Otwórz</a>
+          <form method="post" action="{% url 'panel_post_document_delete' doc.pk %}" onsubmit="return confirm('Usunąć ten dokument?');" style="display:inline">
+            {% csrf_token %}
+            <button type="submit" class="btn">Usuń</button>
+          </form>
+        </div>
+      </div>
+    {% empty %}
+      <p class="muted">Brak dokumentów.</p>
+    {% endfor %}
+  </div>
+
+  <form method="post" action="{% url 'panel_post_document_add' object.pk %}" enctype="multipart/form-data" class="panel-photo-add">
+    {% csrf_token %}
+    <div class="field" style="margin:0">
+      <label for="{{ document_form.file.id_for_label }}">Dodaj dokument</label>
+      {{ document_form.file }}
+    </div>
+    <div class="field" style="margin:0; flex:1">
+      <label for="{{ document_form.title.id_for_label }}">Nazwa (opcjonalnie)</label>
+      {{ document_form.title }}
     </div>
     <button class="btn btn-primary" type="submit">Dodaj</button>
   </form>

@@ -4,7 +4,10 @@
 {% block content %}
 <div class="panel-list-header">
   <h1>Władze</h1>
-  <a href="{% url 'panel_person_create' %}" class="btn btn-primary">+ Dodaj osobę</a>
+  <div class="panel-list-actions">
+    <a href="{% url 'panel_person_trash' %}" class="btn">Kosz</a>
+    <a href="{% url 'panel_person_create' %}" class="btn btn-primary">+ Dodaj osobę</a>
+  </div>
 </div>
 
 <div class="panel-list">

@@ -1,0 +1,30 @@
+{% extends 'panel/base_panel.html' %}
+{% block title %}Kosz — {{ section_title }}{% endblock %}
+
+{% block content %}
+<div class="panel-list-header">
+  <h1>Kosz — {{ section_title }}</h1>
+  <a href="{{ list_url }}" class="btn">← Wróć do listy</a>
+</div>
+<p class="muted">Rzeczy tutaj nie są widoczne na stronie. Możesz je przywrócić albo usunąć na zawsze.</p>
+
+<div class="panel-list">
+  {% for item in items %}
+    <div class="panel-list-row">
+      <div>
+        <div class="panel-list-row-title">{{ item }}</div>
+        <div class="panel-list-row-meta">Usunięto: {{ item.deleted_at|date:'d.m.Y H:i' }}</div>
+      </div>
+      <div class="panel-list-actions">
+        <form method="post" action="{% url restore_url_name item.pk %}" style="display:inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary">Przywróć</button>
+        </form>
+        <a href="{% url purge_url_name item.pk %}" class="btn">Usuń na zawsze</a>
+      </div>
+    </div>
+  {% empty %}
+    <div class="panel-empty">Kosz jest pusty.</div>
+  {% endfor %}
+</div>
+{% endblock %}

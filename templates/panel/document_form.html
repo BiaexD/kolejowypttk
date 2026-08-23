@@ -22,9 +22,6 @@
       {% if object.file %}<p class="muted" style="margin:.4rem 0 0">Obecny plik: {{ object.file.name }}</p>{% endif %}
       {% if form.file.errors %}<div class="field-error">{{ form.file.errors }}</div>{% endif %}
     </div>
-    <div class="field">
-      <label><input type="checkbox" name="{{ form.is_public.html_name }}" {% if form.is_public.value %}checked{% endif %}> Widoczny publicznie</label>
-    </div>
     {% if form.non_field_errors %}<div class="field-error">{{ form.non_field_errors }}</div>{% endif %}
     <div class="form-actions">
       <button class="btn btn-primary" type="submit">Zapisz</button>

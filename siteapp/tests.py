@@ -9,6 +9,7 @@ from django.utils import timezone
 from PIL import Image
 
 from .models import Post, Event, EventPhoto, Person, CentralNews, Document
+from .panel_forms import PanelPostForm, PanelEventForm, PanelDocumentForm
 
 
 def tiny_jpeg():
@@ -54,6 +55,30 @@ class NewsTest(TestCase):
     def test_news_detail_hides_unpublished(self):
         response = self.client.get(reverse("news_detail", args=[self.hidden.pk]))
         self.assertEqual(response.status_code, 404)
+
+
+class EventInNewsFeedTest(TestCase):
+    def test_upcoming_event_shows_in_aktualnosci_but_past_event_does_not(self):
+        upcoming = Event.objects.create(
+            title="Rajd za miesiąc", slug="rajd-za-miesiac", description="Opis",
+            start_date=timezone.now().date() + timezone.timedelta(days=30),
+        )
+        past = Event.objects.create(
+            title="Rajd w zeszłym miesiącu", slug="rajd-w-zeszlym-miesiacu", description="Opis",
+            start_date=timezone.now().date() - timezone.timedelta(days=30),
+        )
+        response = self.client.get(reverse("news_list"))
+        self.assertContains(response, upcoming.title)
+        self.assertNotContains(response, past.title)
+
+    def test_multi_day_event_stays_until_end_date_passes(self):
+        ongoing = Event.objects.create(
+            title="Rajd trwający", slug="rajd-trwajacy", description="Opis",
+            start_date=timezone.now().date() - timezone.timedelta(days=1),
+            end_date=timezone.now().date() + timezone.timedelta(days=1),
+        )
+        response = self.client.get(reverse("news_list"))
+        self.assertContains(response, ongoing.title)
 
 
 class CombinedNewsPageTest(TestCase):
@@ -254,6 +279,65 @@ class PanelContentTest(TestCase):
 
         self.client.post(reverse("panel_post_delete", args=[post.pk]))
         self.assertFalse(Post.objects.filter(pk=post.pk).exists())
+        # soft delete: still there for restore, just hidden from the default manager
+        trashed = Post.all_objects.get(pk=post.pk)
+        self.assertTrue(trashed.is_deleted)
+        self.assertIsNotNone(trashed.deleted_at)
+
+    def test_deleted_post_can_be_restored_from_trash(self):
+        post = Post.objects.create(title="Do kosza", body="x", published_at=timezone.now())
+        post.soft_delete()
+
+        trash = self.client.get(reverse("panel_post_trash"))
+        self.assertContains(trash, "Do kosza")
+
+        self.client.post(reverse("panel_post_restore", args=[post.pk]))
+        self.assertTrue(Post.objects.filter(pk=post.pk).exists())
+
+    def test_purge_permanently_deletes(self):
+        post = Post.objects.create(title="Na zawsze", body="x", published_at=timezone.now())
+        post.soft_delete()
+
+        self.client.post(reverse("panel_post_purge", args=[post.pk]))
+        self.assertFalse(Post.all_objects.filter(pk=post.pk).exists())
+
+    def test_new_post_and_event_are_public_by_default_with_no_visibility_field(self):
+        self.assertNotIn("is_published", PanelPostForm().fields)
+        self.assertNotIn("is_published", PanelEventForm().fields)
+        self.assertNotIn("is_public", PanelDocumentForm().fields)
+
+        self.client.post(reverse("panel_post_create"), {
+            "title": "Domyślnie publiczna", "body": "x", "published_at": "2026-08-23T10:00",
+        })
+        self.assertTrue(Post.objects.get(title="Domyślnie publiczna").is_published)
+
+    def test_can_attach_and_remove_document_on_post(self):
+        post = Post.objects.create(title="Z dokumentem", body="x", published_at=timezone.now())
+        add = self.client.post(
+            reverse("panel_post_document_add", args=[post.pk]),
+            {"file": SimpleUploadedFile("statut.pdf", b"%PDF-1.4 test", content_type="application/pdf"), "title": "Statut"},
+        )
+        self.assertRedirects(add, reverse("panel_post_edit", args=[post.pk]))
+        self.assertEqual(post.documents.count(), 1)
+
+        doc = post.documents.first()
+        self.client.post(reverse("panel_post_document_delete", args=[doc.pk]))
+        self.assertEqual(post.documents.count(), 0)
+
+    def test_event_list_splits_upcoming_and_past(self):
+        upcoming = Event.objects.create(
+            title="Za tydzień", slug="za-tydzien", description="x",
+            start_date=timezone.now().date() + timezone.timedelta(days=7),
+        )
+        past = Event.objects.create(
+            title="Był wczoraj", slug="byl-wczoraj", description="x",
+            start_date=timezone.now().date() - timezone.timedelta(days=1),
+        )
+        response = self.client.get(reverse("panel_event_list"))
+        self.assertIn(upcoming, response.context["upcoming"])
+        self.assertIn(past, response.context["past"])
+        self.assertNotIn(upcoming, response.context["past"])
+        self.assertNotIn(past, response.context["upcoming"])
 
     def test_create_event_auto_generates_unique_slug(self):
         self.client.post(reverse("panel_event_create"), {

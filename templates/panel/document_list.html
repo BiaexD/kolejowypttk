@@ -4,7 +4,10 @@
 {% block content %}
 <div class="panel-list-header">
   <h1>Dokumenty</h1>
-  <a href="{% url 'panel_document_create' %}" class="btn btn-primary">+ Dodaj dokument</a>
+  <div class="panel-list-actions">
+    <a href="{% url 'panel_document_trash' %}" class="btn">Kosz</a>
+    <a href="{% url 'panel_document_create' %}" class="btn btn-primary">+ Dodaj dokument</a>
+  </div>
 </div>
 
 <div class="panel-list">
@@ -12,10 +15,7 @@
     <div class="panel-list-row">
       <div>
         <div class="panel-list-row-title">{{ doc.title }}</div>
-        <div class="panel-list-row-meta">
-          {% if doc.category %}{{ doc.category }} • {% endif %}
-          {% if not doc.is_public %}niewidoczny publicznie{% else %}widoczny publicznie{% endif %}
-        </div>
+        {% if doc.category %}<div class="panel-list-row-meta">{{ doc.category }}</div>{% endif %}
       </div>
       <div class="panel-list-actions">
         <a href="{% url 'panel_document_edit' doc.pk %}" class="btn">Edytuj</a>
