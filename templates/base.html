@@ -104,7 +104,10 @@
       {% endif %}
     </div>
   </div>
-  <p class="copyright">© {% now "Y" %} {{ SITE_NAME }}</p>
+  <p class="copyright">
+    © {% now "Y" %} {{ SITE_NAME }}
+    · <a href="{% url 'panel_login' %}" class="footer-panel-link">Panel redakcyjny</a>
+  </p>
 </footer>
 
 <script>

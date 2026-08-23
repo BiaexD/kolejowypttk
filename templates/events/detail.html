@@ -19,6 +19,18 @@
 
   <div class="prose">{{ item.description|linebreaks }}</div>
 
+  {% if item.map_embed_url %}
+    <h2>Gdzie to jest</h2>
+    <div class="contact-map">
+      <iframe
+        src="{{ item.map_embed_url }}"
+        loading="lazy"
+        title="Mapa — {{ item.location }}">
+      </iframe>
+    </div>
+    <a href="{{ item.map_link_url }}" target="_blank" rel="noopener" class="contact-map-link">Powiększ mapę →</a>
+  {% endif %}
+
   {% if item.photos.all %}
     <h2>Zdjęcia</h2>
     <div class="photo-grid">

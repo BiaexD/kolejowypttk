@@ -119,6 +119,8 @@ class Event(TimeStamped, Trashable):
     start_date = models.DateField(db_index=True, verbose_name="Data rozpoczęcia")
     end_date = models.DateField(blank=True, null=True, verbose_name="Data zakończenia")
     location = models.CharField(max_length=200, blank=True, verbose_name="Miejsce")
+    location_lat = models.FloatField(null=True, blank=True, verbose_name="Miejsce — szerokość geogr.")
+    location_lng = models.FloatField(null=True, blank=True, verbose_name="Miejsce — długość geogr.")
     cover_url = models.URLField(blank=True, verbose_name="Zdjęcie okładkowe (stary URL, zaawansowane)")
     is_published = models.BooleanField(default=True, verbose_name="Opublikowane")
 
@@ -136,6 +138,27 @@ class Event(TimeStamped, Trashable):
     def cover_photo(self):
         first = self.photos.order_by("order", "id").first()
         return first.image.url if first else self.cover_url
+
+    def map_embed_url(self):
+        if self.location_lat is None or self.location_lng is None:
+            return None
+        d_lat, d_lng = 0.004, 0.006
+        bbox = (
+            f"{self.location_lng - d_lng},{self.location_lat - d_lat},"
+            f"{self.location_lng + d_lng},{self.location_lat + d_lat}"
+        )
+        return (
+            f"https://www.openstreetmap.org/export/embed.html?"
+            f"bbox={bbox}&layer=mapnik&marker={self.location_lat},{self.location_lng}"
+        )
+
+    def map_link_url(self):
+        if self.location_lat is None or self.location_lng is None:
+            return None
+        return (
+            f"https://www.openstreetmap.org/?mlat={self.location_lat}&mlon={self.location_lng}"
+            f"#map=16/{self.location_lat}/{self.location_lng}"
+        )
 
 
 class EventPhoto(TimeStamped):

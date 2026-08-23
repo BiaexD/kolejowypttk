@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 
+from .geocoding import geocode_address
 from .models import (
     Post, PostImage, PostDocument, Event, EventPhoto, EventDocument,
     Person, Document, HeroImage,
@@ -254,7 +255,18 @@ class PanelEventCreateView(PanelBaseView, CreateView):
             slug = f"{base}-{i}"
             i += 1
         form.instance.slug = slug
-        self.object = form.save()
+        self.object = form.save(commit=False)
+        if self.object.location:
+            coords = geocode_address(self.object.location)
+            if coords:
+                self.object.location_lat, self.object.location_lng = coords
+            else:
+                messages.warning(
+                    self.request,
+                    "Nie udało się automatycznie zlokalizować tego adresu — mapa nie pojawi się na "
+                    "stronie wydarzenia. Spróbuj podać dokładniejszy adres (ulica, numer, miejscowość).",
+                )
+        self.object.save()
         _save_attachments(self.request, self.request.FILES.getlist('attachments'), EventPhoto, EventDocument, 'event', self.object)
         messages.success(self.request, "Wydarzenie dodane.")
         return HttpResponseRedirect(self.get_success_url())
@@ -276,7 +288,25 @@ class PanelEventUpdateView(PanelBaseView, UpdateView):
         return ctx
 
     def form_valid(self, form):
-        self.object = form.save()
+        location_changed = 'location' in form.changed_data
+        self.object = form.save(commit=False)
+        if location_changed:
+            if self.object.location:
+                coords = geocode_address(self.object.location)
+                if coords:
+                    self.object.location_lat, self.object.location_lng = coords
+                else:
+                    self.object.location_lat = None
+                    self.object.location_lng = None
+                    messages.warning(
+                        self.request,
+                        "Nie udało się automatycznie zlokalizować nowego adresu — mapa zniknie ze "
+                        "strony wydarzenia. Spróbuj podać dokładniejszy adres (ulica, numer, miejscowość).",
+                    )
+            else:
+                self.object.location_lat = None
+                self.object.location_lng = None
+        self.object.save()
         _save_attachments(self.request, self.request.FILES.getlist('attachments'), EventPhoto, EventDocument, 'event', self.object)
         messages.success(self.request, "Zmiany zapisane.")
         return HttpResponseRedirect(self.get_success_url())

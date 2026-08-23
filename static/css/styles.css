@@ -524,7 +524,10 @@ a.news-card:hover h3{color:var(--pttk-green)}
 
 .footer a:hover{text-decoration:underline}
 
-.copyright{color:#888;font-size:.9rem}
+.copyright{color:#888;font-size:.9rem;text-align:center}
+
+.footer-panel-link{color:#888; text-decoration:underline}
+.footer-panel-link:hover{color:var(--pttk-green)}
 
 /* helpers */
 .lead{font-weight:600}
@@ -557,47 +560,17 @@ a.news-card:hover h3{color:var(--pttk-green)}
 .hero-banner-content h1{
   color:#fff;
   font-size:clamp(1.8rem, 4vw, 2.8rem);
+  margin:0;
+}
+
+.hero-eyebrow{
+  font-size:.95rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:#cfe8d6;
   margin:0 0 .5rem;
 }
-
-.hero-tagline{
-  font-size:1.1rem;
-  color:#e8efe9;
-  margin:0 0 1.6rem;
-  max-width:52ch;
-}
-
-.hero-cta{
-  display:flex;
-  flex-wrap:wrap;
-  gap:.9rem;
-}
-
-.btn-hero-primary,
-.btn-hero-outline{
-  display:inline-flex;
-  align-items:center;
-  padding:.75rem 1.4rem;
-  border-radius:999px;
-  font-weight:700;
-  text-decoration:none;
-}
-
-.btn-hero-primary{
-  background:var(--pttk-green);
-  color:#fff;
-  box-shadow:0 4px 14px rgba(0,0,0,.25);
-}
-
-.btn-hero-primary:hover{background:#166a34}
-
-.btn-hero-outline{
-  background:rgba(255,255,255,.08);
-  color:#fff;
-  border:1px solid rgba(255,255,255,.6);
-}
-
-.btn-hero-outline:hover{background:rgba(255,255,255,.18)}
 
 /* --- MOBILE MENU (hamburger) --- */
 .mobile-toggle{

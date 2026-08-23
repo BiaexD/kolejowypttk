@@ -31,6 +31,10 @@
     <div class="field">
       <label for="{{ form.location.id_for_label }}">Miejsce</label>
       {{ form.location }}
+      <p class="field-hint">
+        Podaj pełny adres (ulica, numer, miejscowość) — po zapisaniu strona sama znajdzie go na mapie
+        i pokaże odwiedzającym. Jeśli się nie uda, dostaniesz o tym informację.
+      </p>
     </div>
     {% if form.non_field_errors %}<div class="field-error">{{ form.non_field_errors }}</div>{% endif %}
 

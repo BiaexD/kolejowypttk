@@ -1,4 +1,5 @@
 import io
+from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
@@ -114,6 +115,36 @@ class CombinedNewsPageTest(TestCase):
         self.assertEqual(central_page.number, 1)
 
 
+class GeocodeAddressTest(TestCase):
+    @mock.patch("siteapp.geocoding.requests.get")
+    def test_strips_ul_prefix_before_querying(self, mock_get):
+        from siteapp.geocoding import geocode_address
+
+        mock_get.return_value.raise_for_status.return_value = None
+        mock_get.return_value.json.return_value = [{"lat": "52.4", "lon": "16.9"}]
+
+        result = geocode_address("ul. Kolejowa 23, Poznań")
+
+        self.assertEqual(result, (52.4, 16.9))
+        called_query = mock_get.call_args.kwargs["params"]["q"]
+        self.assertEqual(called_query, "Kolejowa 23, Poznań")
+
+    @mock.patch("siteapp.geocoding.requests.get")
+    def test_returns_none_when_no_results(self, mock_get):
+        from siteapp.geocoding import geocode_address
+
+        mock_get.return_value.raise_for_status.return_value = None
+        mock_get.return_value.json.return_value = []
+
+        self.assertIsNone(geocode_address("coś, co nie istnieje"))
+
+    def test_returns_none_for_empty_address(self):
+        from siteapp.geocoding import geocode_address
+
+        self.assertIsNone(geocode_address(""))
+        self.assertIsNone(geocode_address(None))
+
+
 class EventTest(TestCase):
     def test_event_detail_by_slug(self):
         event = Event.objects.create(
@@ -126,6 +157,25 @@ class EventTest(TestCase):
         response = self.client.get(event.get_absolute_url())
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, event.title)
+
+    def test_no_map_without_coordinates(self):
+        event = Event.objects.create(
+            title="Bez lokalizacji", slug="bez-lokalizacji", description="Opis",
+            start_date=timezone.now().date(),
+        )
+        self.assertIsNone(event.map_embed_url())
+        response = self.client.get(event.get_absolute_url())
+        self.assertNotContains(response, "openstreetmap.org/export/embed")
+
+    def test_map_shown_when_coordinates_set(self):
+        event = Event.objects.create(
+            title="Z lokalizacją", slug="z-lokalizacja", description="Opis",
+            start_date=timezone.now().date(),
+            location="Poznań, Stary Rynek", location_lat=52.4082, location_lng=16.9335,
+        )
+        self.assertIn("openstreetmap.org/export/embed", event.map_embed_url())
+        response = self.client.get(event.get_absolute_url())
+        self.assertContains(response, "openstreetmap.org/export/embed")
 
 
 class GalleryTest(TestCase):
@@ -389,6 +439,50 @@ class PanelContentTest(TestCase):
         })
         slugs = set(Event.objects.filter(title="Rajd Testowy").values_list("slug", flat=True))
         self.assertEqual(len(slugs), 2)
+
+    @mock.patch("siteapp.panel_views.geocode_address")
+    def test_event_location_is_geocoded_automatically_on_save(self, mock_geocode):
+        mock_geocode.return_value = (52.4082, 16.9335)
+        self.client.post(reverse("panel_event_create"), {
+            "title": "Rajd z mapą",
+            "description": "Opis",
+            "start_date": "2026-09-01",
+            "location": "Poznań, Stary Rynek",
+        })
+        mock_geocode.assert_called_once_with("Poznań, Stary Rynek")
+        event = Event.objects.get(title="Rajd z mapą")
+        self.assertAlmostEqual(event.location_lat, 52.4082)
+        self.assertAlmostEqual(event.location_lng, 16.9335)
+
+    @mock.patch("siteapp.panel_views.geocode_address")
+    def test_event_location_geocode_failure_warns_and_leaves_no_map(self, mock_geocode):
+        mock_geocode.return_value = None
+        response = self.client.post(reverse("panel_event_create"), {
+            "title": "Rajd bez adresu",
+            "description": "Opis",
+            "start_date": "2026-09-01",
+            "location": "Coś nieistniejącego xyzxyz",
+        }, follow=True)
+        event = Event.objects.get(title="Rajd bez adresu")
+        self.assertIsNone(event.location_lat)
+        self.assertContains(response, "Nie udało się automatycznie zlokalizować")
+
+    @mock.patch("siteapp.panel_views.geocode_address")
+    def test_editing_event_only_regeocodes_when_location_text_changes(self, mock_geocode):
+        mock_geocode.return_value = (52.4082, 16.9335)
+        create = self.client.post(reverse("panel_event_create"), {
+            "title": "Rajd stały", "description": "Opis", "start_date": "2026-09-01",
+            "location": "Poznań, Stary Rynek",
+        })
+        event = Event.objects.get(title="Rajd stały")
+        mock_geocode.assert_called_once()
+
+        mock_geocode.reset_mock()
+        self.client.post(reverse("panel_event_edit", args=[event.pk]), {
+            "title": "Rajd stały (zmieniony tytuł)", "description": "Opis", "start_date": "2026-09-01",
+            "location": "Poznań, Stary Rynek",
+        })
+        mock_geocode.assert_not_called()
 
     def test_create_document_requires_a_file(self):
         response = self.client.post(reverse("panel_document_create"), {

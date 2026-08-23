@@ -3,12 +3,8 @@
 <section class="hero-banner" style="--bg:url('{% if h.image %}{{ h.image.url }}{% elif h.image_url %}{% static h.image_url %}{% else %}{% static 'img/hero1.jpg' %}{% endif %}')">
   <div class="hero-banner-overlay"></div>
   <div class="hero-banner-content container">
+    <p class="hero-eyebrow">Witamy na stronie</p>
     <h1>{{ SITE_NAME }}</h1>
-    <p class="hero-tagline">{{ SITE_TAGLINE }}</p>
-    <div class="hero-cta">
-      <a href="{% url 'news_list' %}" class="btn btn-hero-primary">Aktualności</a>
-      <a href="{% url 'contact' %}" class="btn btn-hero-outline">Dołącz do nas</a>
-    </div>
   </div>
 </section>
 {% endwith %}
