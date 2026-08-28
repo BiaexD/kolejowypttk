@@ -5,6 +5,7 @@ from unittest import mock
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -94,10 +95,20 @@ class CombinedNewsPageTest(TestCase):
             )
         for i in range(4):
             CentralNews.objects.create(
+                source=CentralNews.SOURCE_CENTRALA,
                 wp_id=i,
                 title=f"Aktualność centrali {i}",
                 excerpt="Treść",
                 link="https://pttk.pl/przyklad/",
+                published_at=timezone.now(),
+            )
+        for i in range(4):
+            CentralNews.objects.create(
+                source=CentralNews.SOURCE_WKO,
+                wp_id=i,
+                title=f"Aktualność WKO {i}",
+                excerpt="Treść",
+                link="https://wko.pttk.pl/przyklad/",
                 published_at=timezone.now(),
             )
 
@@ -105,15 +116,70 @@ class CombinedNewsPageTest(TestCase):
         response = self.client.get(reverse("news_list"))
         self.assertContains(response, "U nas")
         self.assertContains(response, "Z centrali PTTK")
+        self.assertContains(response, "Z Wielkopolskiej Korporacji")
         self.assertContains(response, "Własna aktualność 3")
         self.assertContains(response, "Aktualność centrali 3")
+        self.assertContains(response, "Aktualność WKO 3")
 
     def test_own_and_central_pagination_are_independent(self):
         response = self.client.get(reverse("news_list"), {"own_page": 2})
         own_page = response.context["own_page"]
         central_page = response.context["central_page"]
+        wko_page = response.context["wko_page"]
         self.assertEqual(own_page.number, 2)
         self.assertEqual(central_page.number, 1)
+        self.assertEqual(wko_page.number, 1)
+
+    def test_central_and_wko_news_do_not_mix(self):
+        response = self.client.get(reverse("news_list"))
+        central_page = response.context["central_page"]
+        wko_page = response.context["wko_page"]
+        self.assertTrue(all(item.source == CentralNews.SOURCE_CENTRALA for item in central_page))
+        self.assertTrue(all(item.source == CentralNews.SOURCE_WKO for item in wko_page))
+
+
+class ImportWkoNewsCommandTest(TestCase):
+    @mock.patch("siteapp.management.commands.import_wko_news.requests.get")
+    def test_imports_posts_and_tags_them_as_wko(self, mock_get):
+        mock_get.return_value.raise_for_status.return_value = None
+        mock_get.return_value.json.return_value = [
+            {
+                "id": 4020,
+                "date": "2026-07-26T00:08:15",
+                "title": {"rendered": "Żegnamy kol. Ryszarda Milera"},
+                "excerpt": {"rendered": "<p>Treść.</p>"},
+                "link": "https://wko.pttk.pl/zegnamy-kol-ryszarda-milera/",
+                "_embedded": {},
+            }
+        ]
+
+        call_command("import_wko_news")
+
+        item = CentralNews.objects.get(wp_id=4020)
+        self.assertEqual(item.source, CentralNews.SOURCE_WKO)
+        self.assertEqual(item.title, "Żegnamy kol. Ryszarda Milera")
+
+    @mock.patch("siteapp.management.commands.import_wko_news.requests.get")
+    def test_same_wp_id_can_exist_for_both_sources(self, mock_get):
+        CentralNews.objects.create(
+            source=CentralNews.SOURCE_CENTRALA, wp_id=1, title="Centrala #1",
+            link="https://pttk.pl/x/", published_at=timezone.now(),
+        )
+        mock_get.return_value.raise_for_status.return_value = None
+        mock_get.return_value.json.return_value = [
+            {
+                "id": 1,
+                "date": "2026-07-26T00:08:15",
+                "title": {"rendered": "WKO #1"},
+                "excerpt": {"rendered": "<p>Treść.</p>"},
+                "link": "https://wko.pttk.pl/x/",
+                "_embedded": {},
+            }
+        ]
+
+        call_command("import_wko_news")
+
+        self.assertEqual(CentralNews.objects.filter(wp_id=1).count(), 2)
 
 
 class GeocodeAddressTest(TestCase):

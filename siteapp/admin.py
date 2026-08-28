@@ -89,7 +89,8 @@ class PostAdmin(TrashableAdminMixin, admin.ModelAdmin):
 
 @admin.register(CentralNews)
 class CentralNewsAdmin(admin.ModelAdmin):
-    list_display = ('title', 'published_at')
+    list_display = ('title', 'source', 'published_at')
+    list_filter = ('source',)
     search_fields = ('title', 'excerpt')
     ordering = ('-published_at',)
 

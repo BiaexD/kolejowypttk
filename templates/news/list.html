@@ -6,89 +6,87 @@
 <h1>Aktualności</h1>
 
 <section class="news-row-section" id="u-nas" data-ajax-region>
-  <div class="news-row-header">
-    <h2>U nas</h2>
-  </div>
+  <h2>U nas</h2>
 
-  <div class="row-nav-wrap">
-  {% include 'partials/page_pagination_arrows.html' with prev_url=own_prev_url next_url=own_next_url %}
-  <div class="news-grid news-grid-row">
+  <div class="event-list">
   {% for item in own_page %}
     {% if item.start_date %}
-      <article class="news-card">
-        <a href="{{ item.get_absolute_url }}" class="news-card-media">
-          {% with cover=item.cover_photo %}
-            {% if cover %}
-              <img src="{{ cover }}" alt="{{ item.title }}" loading="lazy">
-            {% else %}
-              <div class="news-card-media-placeholder"></div>
-            {% endif %}
-          {% endwith %}
-        </a>
-        <div class="news-card-body">
-          <time class="news-card-date">Wydarzenie: {{ item.start_date|date:'d.m.Y' }}</time>
-          <h3><a href="{{ item.get_absolute_url }}">{{ item.title }}</a></h3>
-          <p>{{ item.description|truncatewords:20 }}</p>
-          <a class="news-card-more" href="{{ item.get_absolute_url }}">Zobacz wydarzenie →</a>
+      <a href="{{ item.get_absolute_url }}" class="event-row">
+        <div class="event-date">
+          <span class="event-day">{{ item.start_date|date:'d' }}</span>
+          <span class="event-month">{{ item.start_date|date:'M' }}</span>
         </div>
-      </article>
+        <div class="event-info">
+          <h2>{{ item.title }}</h2>
+        </div>
+      </a>
     {% else %}
-      <article class="news-card">
-        <a href="{% url 'news_detail' item.pk %}" class="news-card-media">
-          {% with first=item.images.first %}
-            {% if first %}
-              <img src="{{ first.image.url }}" alt="{{ first.caption|default:item.title }}" loading="lazy">
-            {% elif item.image_url %}
-              <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy">
-            {% else %}
-              <div class="news-card-media-placeholder"></div>
-            {% endif %}
-          {% endwith %}
-        </a>
-        <div class="news-card-body">
-          <time class="news-card-date">{{ item.published_at|date:'d.m.Y' }}</time>
-          <h3><a href="{% url 'news_detail' item.pk %}">{{ item.title|default:"Aktualność" }}</a></h3>
-          <p>{{ item.body|truncatewords:20 }}</p>
-          <a class="news-card-more" href="{% url 'news_detail' item.pk %}">Czytaj więcej →</a>
+      <a href="{% url 'news_detail' item.pk %}" class="event-row">
+        <div class="event-date">
+          <span class="event-day">{{ item.published_at|date:'d' }}</span>
+          <span class="event-month">{{ item.published_at|date:'M' }}</span>
         </div>
-      </article>
+        <div class="event-info">
+          <h2>{{ item.title|default:"Aktualność" }}</h2>
+        </div>
+      </a>
     {% endif %}
   {% empty %}
     <p>Brak aktualności.</p>
   {% endfor %}
   </div>
+  <div class="page-nav-row">
+    {% include 'partials/page_pagination_arrows.html' with prev_url=own_prev_url next_url=own_next_url %}
   </div>
 </section>
 
 <section class="news-row-section" id="z-centrali" data-ajax-region>
-  <div class="news-row-header">
-    <h2>Z centrali PTTK</h2>
-  </div>
+  <h2>Z centrali PTTK</h2>
   <p class="event-meta">Nowości ze strony <a href="https://pttk.pl" target="_blank" rel="noopener">pttk.pl</a></p>
 
-  <div class="row-nav-wrap">
-  {% include 'partials/page_pagination_arrows.html' with prev_url=central_prev_url next_url=central_next_url %}
-  <div class="news-grid news-grid-row">
+  <div class="event-list">
   {% for item in central_page %}
-    <a href="{{ item.link }}" target="_blank" rel="noopener" class="news-card">
-      <div class="news-card-media">
-        {% if item.image_url %}
-          <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy">
-        {% else %}
-          <div class="news-card-media-placeholder"></div>
-        {% endif %}
+    <a href="{{ item.link }}" target="_blank" rel="noopener" class="event-row">
+      <div class="event-date">
+        <span class="event-day">{{ item.published_at|date:'d' }}</span>
+        <span class="event-month">{{ item.published_at|date:'M' }}</span>
       </div>
-      <div class="news-card-body">
-        <time class="news-card-date">{{ item.published_at|date:'d.m.Y' }}</time>
-        <h3>{{ item.title }}</h3>
-        <p>{{ item.excerpt|truncatewords:20 }}</p>
-        <span class="news-card-more">Czytaj na pttk.pl →</span>
+      <div class="event-info">
+        <h2>{{ item.title }}</h2>
+        <p class="event-meta">pttk.pl →</p>
       </div>
     </a>
   {% empty %}
     <p>Brak aktualności z centrali.</p>
   {% endfor %}
   </div>
+  <div class="page-nav-row">
+    {% include 'partials/page_pagination_arrows.html' with prev_url=central_prev_url next_url=central_next_url %}
+  </div>
+</section>
+
+<section class="news-row-section" id="z-wko" data-ajax-region>
+  <h2>Z Wielkopolskiej Korporacji</h2>
+  <p class="event-meta">Nowości ze strony <a href="https://wko.pttk.pl" target="_blank" rel="noopener">wko.pttk.pl</a></p>
+
+  <div class="event-list">
+  {% for item in wko_page %}
+    <a href="{{ item.link }}" target="_blank" rel="noopener" class="event-row">
+      <div class="event-date">
+        <span class="event-day">{{ item.published_at|date:'d' }}</span>
+        <span class="event-month">{{ item.published_at|date:'M' }}</span>
+      </div>
+      <div class="event-info">
+        <h2>{{ item.title }}</h2>
+        <p class="event-meta">wko.pttk.pl →</p>
+      </div>
+    </a>
+  {% empty %}
+    <p>Brak aktualności z Wielkopolskiej Korporacji.</p>
+  {% endfor %}
+  </div>
+  <div class="page-nav-row">
+    {% include 'partials/page_pagination_arrows.html' with prev_url=wko_prev_url next_url=wko_next_url %}
   </div>
 </section>
 {% endblock %}

@@ -53,19 +53,26 @@ def news_list(request):
     own_items = sorted(posts + upcoming_events, key=feed_date, reverse=True)
     own_page = Paginator(own_items, 3).get_page(request.GET.get('own_page'))
 
-    central_items = CentralNews.objects.all()
+    central_items = CentralNews.objects.filter(source=CentralNews.SOURCE_CENTRALA)
     central_page = Paginator(central_items, 3).get_page(request.GET.get('central_page'))
+
+    wko_items = CentralNews.objects.filter(source=CentralNews.SOURCE_WKO)
+    wko_page = Paginator(wko_items, 3).get_page(request.GET.get('wko_page'))
 
     own_prev_url, own_next_url = _page_nav_urls(request, own_page, 'own_page')
     central_prev_url, central_next_url = _page_nav_urls(request, central_page, 'central_page')
+    wko_prev_url, wko_next_url = _page_nav_urls(request, wko_page, 'wko_page')
 
     return render(request, 'news/list.html', {
         'own_page': own_page,
         'central_page': central_page,
+        'wko_page': wko_page,
         'own_prev_url': own_prev_url,
         'own_next_url': own_next_url,
         'central_prev_url': central_prev_url,
         'central_next_url': central_next_url,
+        'wko_prev_url': wko_prev_url,
+        'wko_next_url': wko_next_url,
     })
 
 def news_detail(request, pk):

@@ -251,8 +251,17 @@ class Person(TimeStamped, Trashable):
 
 
 class CentralNews(TimeStamped):
-    """Aktualność zaimportowana z pttk.pl (centrala), przez WP REST API."""
-    wp_id = models.PositiveIntegerField(unique=True)
+    """Aktualność zaimportowana z zewnętrznej strony PTTK (WordPress) przez WP REST API."""
+
+    SOURCE_CENTRALA = 'centrala'
+    SOURCE_WKO = 'wko'
+    SOURCE_CHOICES = [
+        (SOURCE_CENTRALA, 'Centrala PTTK'),
+        (SOURCE_WKO, 'Wielkopolska Korporacja Oddziałów PTTK'),
+    ]
+
+    source = models.CharField(max_length=20, choices=SOURCE_CHOICES, default=SOURCE_CENTRALA)
+    wp_id = models.PositiveIntegerField()
     title = models.CharField(max_length=300)
     excerpt = models.TextField(blank=True)
     link = models.URLField()
@@ -261,8 +270,11 @@ class CentralNews(TimeStamped):
 
     class Meta:
         ordering = ['-published_at']
-        verbose_name = 'Aktualność z centrali PTTK'
-        verbose_name_plural = 'Aktualności z centrali PTTK'
+        verbose_name = 'Aktualność zewnętrzna PTTK'
+        verbose_name_plural = 'Aktualności zewnętrzne PTTK'
+        constraints = [
+            models.UniqueConstraint(fields=['source', 'wp_id'], name='uniq_centralnews_source_wp_id'),
+        ]
 
     def __str__(self):
         return self.title

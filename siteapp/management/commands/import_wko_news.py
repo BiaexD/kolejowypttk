@@ -8,7 +8,7 @@ from django.utils.timezone import make_aware
 
 from siteapp.models import CentralNews
 
-API_URL = "https://pttk.pl/wp-json/wp/v2/posts"
+API_URL = "https://wko.pttk.pl/wp-json/wp/v2/posts"
 
 
 def clean_text(raw):
@@ -16,7 +16,7 @@ def clean_text(raw):
 
 
 class Command(BaseCommand):
-    help = "Importuje najnowsze aktualności z pttk.pl (centrala) przez WP REST API."
+    help = "Importuje najnowsze aktualności z wko.pttk.pl (Wielkopolska Korporacja Oddziałów PTTK) przez WP REST API."
 
     def add_arguments(self, parser):
         parser.add_argument("--limit", type=int, default=20, help="Ile najnowszych aktualności pobrać.")
@@ -32,7 +32,7 @@ class Command(BaseCommand):
             r = requests.get(API_URL, params=params, timeout=20)
             r.raise_for_status()
         except requests.RequestException as e:
-            self.stderr.write(self.style.ERROR(f"Błąd pobierania z pttk.pl: {e}"))
+            self.stderr.write(self.style.ERROR(f"Błąd pobierania z wko.pttk.pl: {e}"))
             return
 
         added, updated = 0, 0
@@ -47,7 +47,7 @@ class Command(BaseCommand):
                 image_url = media[0].get("source_url", "")
 
             obj, is_created = CentralNews.objects.update_or_create(
-                source=CentralNews.SOURCE_CENTRALA,
+                source=CentralNews.SOURCE_WKO,
                 wp_id=p["id"],
                 defaults=dict(
                     title=clean_text(p["title"]["rendered"]),
@@ -62,4 +62,4 @@ class Command(BaseCommand):
             else:
                 updated += 1
 
-        self.stdout.write(self.style.SUCCESS(f"PTTK centrala → dodano: {added}, zaktualizowano: {updated}"))
+        self.stdout.write(self.style.SUCCESS(f"WKO PTTK → dodano: {added}, zaktualizowano: {updated}"))
