@@ -6,11 +6,11 @@
 
 {% block content %}
 
-<div class="news-row-header">
-  <h1>Galeria</h1>
-  {% include 'partials/page_pagination_arrows.html' %}
-</div>
+<h1>Galeria</h1>
 
+<div id="galeria-lista" data-ajax-region>
+<div class="row-nav-wrap">
+{% include 'partials/page_pagination_arrows.html' with prev_url=prev_url next_url=next_url %}
 <div class="news-grid">
 {% for a in albums %}
   <a href="{% url 'gallery_album_detail' a.slug %}" class="news-card">
@@ -26,6 +26,8 @@
 {% empty %}
   <p>Brak albumów. Zdjęcia z wydarzeń pojawią się tutaj, gdy zostaną dodane.</p>
 {% endfor %}
+</div>
+</div>
 </div>
 
 {% endblock %}

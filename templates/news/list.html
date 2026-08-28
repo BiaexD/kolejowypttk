@@ -5,25 +5,13 @@
 {% block content %}
 <h1>Aktualności</h1>
 
-<section class="news-row-section" id="u-nas">
+<section class="news-row-section" id="u-nas" data-ajax-region>
   <div class="news-row-header">
     <h2>U nas</h2>
-    {% if own_page.paginator.num_pages > 1 %}
-      <div class="row-nav">
-        {% if own_page.has_previous %}
-          <a href="{% querystring own_page=own_page.previous_page_number %}#u-nas" class="row-nav-btn" aria-label="Poprzednie">←</a>
-        {% else %}
-          <span class="row-nav-btn is-disabled" aria-hidden="true">←</span>
-        {% endif %}
-        {% if own_page.has_next %}
-          <a href="{% querystring own_page=own_page.next_page_number %}#u-nas" class="row-nav-btn" aria-label="Następne">→</a>
-        {% else %}
-          <span class="row-nav-btn is-disabled" aria-hidden="true">→</span>
-        {% endif %}
-      </div>
-    {% endif %}
   </div>
 
+  <div class="row-nav-wrap">
+  {% include 'partials/page_pagination_arrows.html' with prev_url=own_prev_url next_url=own_next_url %}
   <div class="news-grid news-grid-row">
   {% for item in own_page %}
     {% if item.start_date %}
@@ -69,28 +57,17 @@
     <p>Brak aktualności.</p>
   {% endfor %}
   </div>
+  </div>
 </section>
 
-<section class="news-row-section" id="z-centrali">
+<section class="news-row-section" id="z-centrali" data-ajax-region>
   <div class="news-row-header">
     <h2>Z centrali PTTK</h2>
-    {% if central_page.paginator.num_pages > 1 %}
-      <div class="row-nav">
-        {% if central_page.has_previous %}
-          <a href="{% querystring central_page=central_page.previous_page_number %}#z-centrali" class="row-nav-btn" aria-label="Poprzednie">←</a>
-        {% else %}
-          <span class="row-nav-btn is-disabled" aria-hidden="true">←</span>
-        {% endif %}
-        {% if central_page.has_next %}
-          <a href="{% querystring central_page=central_page.next_page_number %}#z-centrali" class="row-nav-btn" aria-label="Następne">→</a>
-        {% else %}
-          <span class="row-nav-btn is-disabled" aria-hidden="true">→</span>
-        {% endif %}
-      </div>
-    {% endif %}
   </div>
   <p class="event-meta">Nowości ze strony <a href="https://pttk.pl" target="_blank" rel="noopener">pttk.pl</a></p>
 
+  <div class="row-nav-wrap">
+  {% include 'partials/page_pagination_arrows.html' with prev_url=central_prev_url next_url=central_next_url %}
   <div class="news-grid news-grid-row">
   {% for item in central_page %}
     <a href="{{ item.link }}" target="_blank" rel="noopener" class="news-card">
@@ -111,6 +88,7 @@
   {% empty %}
     <p>Brak aktualności z centrali.</p>
   {% endfor %}
+  </div>
   </div>
 </section>
 {% endblock %}

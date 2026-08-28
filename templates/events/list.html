@@ -6,28 +6,57 @@
 
 {% block content %}
 
-<div class="news-row-header">
-  <h1>Wydarzenia</h1>
-  {% include 'partials/page_pagination_arrows.html' %}
-</div>
+<h1>Wydarzenia</h1>
 
-<div class="event-list">
-{% for e in items %}
-  <a href="{{ e.get_absolute_url }}" class="event-row">
-    <div class="event-date">
-      <span class="event-day">{{ e.start_date|date:'d' }}</span>
-      <span class="event-month">{{ e.start_date|date:'M' }}</span>
-    </div>
-    <div class="event-info">
-      <h2>{{ e.title }}</h2>
-      <p class="event-meta">
-        {{ e.start_date|date:'d.m.Y' }}{% if e.start_time %}, {{ e.start_time|time:'H:i' }}{% endif %}{% if e.end_date %} – {{ e.end_date|date:'d.m.Y' }}{% endif %}
-        {% if e.location %} • {{ e.location }}{% endif %}
-      </p>
-    </div>
-  </a>
-{% empty %}
-  <p>Brak wydarzeń.</p>
-{% endfor %}
-</div>
+<section class="event-section" id="nadchodzace" data-ajax-region>
+  <h2>Nadchodzące</h2>
+  <div class="event-list">
+  {% for e in upcoming_page %}
+    <a href="{{ e.get_absolute_url }}" class="event-row">
+      <div class="event-date">
+        <span class="event-day">{{ e.start_date|date:'d' }}</span>
+        <span class="event-month">{{ e.start_date|date:'M' }}</span>
+      </div>
+      <div class="event-info">
+        <h2>{{ e.title }}</h2>
+        <p class="event-meta">
+          {{ e.start_date|date:'d.m.Y' }}{% if e.start_time %}, {{ e.start_time|time:'H:i' }}{% endif %}{% if e.end_date %} – {{ e.end_date|date:'d.m.Y' }}{% endif %}
+          {% if e.location %} • {{ e.location }}{% endif %}
+        </p>
+      </div>
+    </a>
+  {% empty %}
+    <p>Brak nadchodzących wydarzeń.</p>
+  {% endfor %}
+  </div>
+  <div class="page-nav-row">
+    {% include 'partials/page_pagination_arrows.html' with prev_url=upcoming_prev_url next_url=upcoming_next_url %}
+  </div>
+</section>
+
+<section class="event-section" id="minione" data-ajax-region>
+  <h2>Minione</h2>
+  <div class="event-list">
+  {% for e in past_page %}
+    <a href="{{ e.get_absolute_url }}" class="event-row">
+      <div class="event-date">
+        <span class="event-day">{{ e.start_date|date:'d' }}</span>
+        <span class="event-month">{{ e.start_date|date:'M' }}</span>
+      </div>
+      <div class="event-info">
+        <h2>{{ e.title }}</h2>
+        <p class="event-meta">
+          {{ e.start_date|date:'d.m.Y' }}{% if e.start_time %}, {{ e.start_time|time:'H:i' }}{% endif %}{% if e.end_date %} – {{ e.end_date|date:'d.m.Y' }}{% endif %}
+          {% if e.location %} • {{ e.location }}{% endif %}
+        </p>
+      </div>
+    </a>
+  {% empty %}
+    <p>Brak minionych wydarzeń.</p>
+  {% endfor %}
+  </div>
+  <div class="page-nav-row">
+    {% include 'partials/page_pagination_arrows.html' with prev_url=past_prev_url next_url=past_next_url %}
+  </div>
+</section>
 {% endblock %}

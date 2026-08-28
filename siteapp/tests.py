@@ -565,6 +565,21 @@ class PanelContentTest(TestCase):
         self.assertNotIn(upcoming, response.context["past"])
         self.assertNotIn(past, response.context["upcoming"])
 
+    def test_public_event_list_splits_upcoming_and_past(self):
+        upcoming = Event.objects.create(
+            title="Za tydzień", slug="za-tydzien-pub", description="x", is_published=True,
+            start_date=timezone.now().date() + timezone.timedelta(days=7),
+        )
+        past = Event.objects.create(
+            title="Był w kwietniu", slug="byl-w-kwietniu-pub", description="x", is_published=True,
+            start_date=timezone.now().date() - timezone.timedelta(days=120),
+        )
+        response = self.client.get(reverse("event_list"))
+        self.assertIn(upcoming, response.context["upcoming_page"].object_list)
+        self.assertIn(past, response.context["past_page"].object_list)
+        self.assertNotIn(upcoming, response.context["past_page"].object_list)
+        self.assertNotIn(past, response.context["upcoming_page"].object_list)
+
     def test_create_event_auto_generates_unique_slug(self):
         self.client.post(reverse("panel_event_create"), {
             "title": "Rajd Testowy",

@@ -22,6 +22,9 @@ h1,h2,h3{color:var(--pttk-dark);margin:.6rem 0}
 /* layout */
 .container{max-width:1100px;margin:0 auto;padding:0 1.25rem}
 
+/* odstęp treści strony od stickowego paska nawigacji, spójny na każdej podstronie */
+main.container{padding-top:2rem}
+
 .site-header{
   position:sticky;
   top:0;
@@ -394,25 +397,53 @@ a.news-card:hover h3{color:var(--pttk-green)}
 .news-row-header h1,
 .news-row-header h2{margin:0}
 
-.row-nav{display:flex;gap:.5rem}
+/* Strzałki paginacji "wierszy" kart (Aktualności, Galeria) — po bokach treści, nie przy nagłówku */
+.row-nav-wrap{position:relative}
 
-.row-nav-btn{
-  display:inline-flex;
+.page-nav-btn{
+  display:flex;
   align-items:center;
   justify-content:center;
-  width:44px;
-  height:44px;
+  width:52px;
+  height:52px;
   border-radius:999px;
   border:1px solid var(--rail-gray);
   color:var(--pttk-dark);
   text-decoration:none;
   font-weight:700;
+  font-size:1.6rem;
+  line-height:1;
   background:#fff;
+  box-shadow:0 4px 14px rgba(0,0,0,.12);
+  transition:border-color .15s ease, color .15s ease, box-shadow .15s ease;
 }
 
-.row-nav-btn:hover{border-color:var(--pttk-green); color:var(--pttk-green)}
+.page-nav-btn:hover{border-color:var(--pttk-green); color:var(--pttk-green); box-shadow:0 6px 18px rgba(0,0,0,.16)}
 
-.row-nav-btn.is-disabled{opacity:.35; pointer-events:none}
+.page-nav-btn.is-disabled{opacity:.3; box-shadow:none}
+
+.row-nav-wrap .page-nav-btn{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:5;
+}
+
+.row-nav-wrap .page-nav-prev{left:-64px}
+.row-nav-wrap .page-nav-next{right:-64px}
+
+@media (max-width:1300px){
+  .row-nav-wrap .page-nav-prev{left:-8px}
+  .row-nav-wrap .page-nav-next{right:-8px}
+}
+
+@media (max-width:900px){
+  .row-nav-wrap{display:flex; flex-direction:column; gap:.75rem}
+  .row-nav-wrap .page-nav-btn{position:static; transform:none; align-self:center}
+}
+
+/* Strzałki pod listą (Wydarzenia — układ pionowy, nie siatka kart) */
+.page-nav-row{display:flex; justify-content:center; gap:1rem; margin-top:1.25rem}
 
 .news-grid.news-grid-row{grid-template-columns:repeat(3,1fr)}
 
@@ -440,6 +471,9 @@ a.news-card:hover h3{color:var(--pttk-green)}
 }
 
 .news-card-more:hover{text-decoration:underline}
+
+/* Wydarzenia — sekcje nadchodzące/minione */
+.event-section{margin:2rem 0}
 
 /* Wydarzenia — lista wierszy */
 .event-list{

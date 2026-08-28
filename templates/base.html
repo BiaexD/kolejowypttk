@@ -139,6 +139,33 @@
       }
     });
   });
+
+  // Paginacja "strzałkami" bez przeładowania strony: podmienia tylko oznaczone
+  // sekcje (data-ajax-region), bez skoku scrolla i bez ponownego ładowania całej strony.
+  function pttkLoadPage(url, pushState) {
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then((r) => r.text())
+      .then((html) => {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        document.querySelectorAll('[data-ajax-region]').forEach((region) => {
+          const fresh = doc.getElementById(region.id);
+          if (fresh) region.replaceWith(fresh);
+        });
+        if (pushState) history.pushState({}, '', url);
+      })
+      .catch(() => { window.location.href = url; });
+  }
+
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('a.page-nav-btn[href]');
+    if (!btn) return;
+    e.preventDefault();
+    pttkLoadPage(btn.getAttribute('href'), true);
+  });
+
+  window.addEventListener('popstate', () => {
+    pttkLoadPage(window.location.href, false);
+  });
 </script>
 
 

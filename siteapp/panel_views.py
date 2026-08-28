@@ -4,7 +4,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
-from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
@@ -12,6 +11,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 
+from .event_utils import event_time_split
 from .geocoding import geocode_address
 from .models import (
     Post, PostImage, PostDocument, Event, EventPhoto, EventDocument,
@@ -225,17 +225,9 @@ def panel_post_document_delete(request, pk):
 
 # ---------- Wydarzenia ----------
 
-def _event_time_split():
-    today = timezone.now().date()
-    is_past = Q(end_date__lt=today) | (Q(end_date__isnull=True) & Q(start_date__lt=today))
-    past = Event.objects.filter(is_past).order_by('-start_date')
-    upcoming = Event.objects.exclude(is_past).order_by('start_date')
-    return upcoming, past
-
-
 @login_required
 def panel_event_list(request):
-    upcoming, past = _event_time_split()
+    upcoming, past = event_time_split()
     return render(request, 'panel/event_list.html', {'upcoming': upcoming, 'past': past})
 
 

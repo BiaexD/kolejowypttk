@@ -9,11 +9,27 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from .models import Post, PostImage, Event, Person, Document, HeroImage, CentralNews
+from .event_utils import event_time_split
 from .forms import ContactForm
 from .geocoding import geocode_address, get_route, ORS_PROFILES
 
 import logging
 logger = logging.getLogger(__name__)
+
+
+def _page_nav_urls(request, page_obj, param):
+    """Buduje adresy poprzedniej/następnej strony (zachowując resztę query stringa), albo None gdy brak."""
+    def build(page_number):
+        if not page_number:
+            return None
+        qd = request.GET.copy()
+        qd[param] = page_number
+        return f"{request.path}?{qd.urlencode()}"
+
+    prev_number = page_obj.previous_page_number() if page_obj.has_previous() else None
+    next_number = page_obj.next_page_number() if page_obj.has_next() else None
+    return build(prev_number), build(next_number)
+
 
 def index(request):
     news = Post.objects.filter(is_published=True).prefetch_related('images').order_by('-published_at')[:6]
@@ -40,16 +56,38 @@ def news_list(request):
     central_items = CentralNews.objects.all()
     central_page = Paginator(central_items, 3).get_page(request.GET.get('central_page'))
 
-    return render(request, 'news/list.html', {'own_page': own_page, 'central_page': central_page})
+    own_prev_url, own_next_url = _page_nav_urls(request, own_page, 'own_page')
+    central_prev_url, central_next_url = _page_nav_urls(request, central_page, 'central_page')
+
+    return render(request, 'news/list.html', {
+        'own_page': own_page,
+        'central_page': central_page,
+        'own_prev_url': own_prev_url,
+        'own_next_url': own_next_url,
+        'central_prev_url': central_prev_url,
+        'central_next_url': central_next_url,
+    })
 
 def news_detail(request, pk):
     item = get_object_or_404(Post.objects.prefetch_related('images'), pk=pk, is_published=True)
     return render(request, 'news/detail.html', {'item': item})
 
 def event_list(request):
-    items = Event.objects.filter(is_published=True).order_by('start_date')
-    page_obj = Paginator(items, 15).get_page(request.GET.get('page'))
-    return render(request, 'events/list.html', {'items': page_obj.object_list, 'page_obj': page_obj})
+    upcoming, past = event_time_split(Event.objects.filter(is_published=True))
+    upcoming_page = Paginator(upcoming, 10).get_page(request.GET.get('upcoming_page'))
+    past_page = Paginator(past, 10).get_page(request.GET.get('past_page'))
+
+    upcoming_prev_url, upcoming_next_url = _page_nav_urls(request, upcoming_page, 'upcoming_page')
+    past_prev_url, past_next_url = _page_nav_urls(request, past_page, 'past_page')
+
+    return render(request, 'events/list.html', {
+        'upcoming_page': upcoming_page,
+        'past_page': past_page,
+        'upcoming_prev_url': upcoming_prev_url,
+        'upcoming_next_url': upcoming_next_url,
+        'past_prev_url': past_prev_url,
+        'past_next_url': past_next_url,
+    })
 
 def event_detail(request, slug):
     item = get_object_or_404(Event.objects.prefetch_related('photos'), slug=slug, is_published=True)
@@ -123,7 +161,13 @@ def gallery_albums(request):
         .order_by('-start_date')
     )
     page_obj = Paginator(albums, 9).get_page(request.GET.get('page'))
-    return render(request, 'gallery/albums.html', {'albums': page_obj.object_list, 'page_obj': page_obj})
+    prev_url, next_url = _page_nav_urls(request, page_obj, 'page')
+    return render(request, 'gallery/albums.html', {
+        'albums': page_obj.object_list,
+        'page_obj': page_obj,
+        'prev_url': prev_url,
+        'next_url': next_url,
+    })
 
 def gallery_album_detail(request, slug):
     album = get_object_or_404(Event.objects.prefetch_related('photos'), slug=slug, is_published=True)

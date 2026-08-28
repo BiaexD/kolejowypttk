@@ -1,14 +1,12 @@
-{% if page_obj.paginator.num_pages > 1 %}
-<div class="row-nav">
-  {% if page_obj.has_previous %}
-    <a href="{% querystring page=page_obj.previous_page_number %}" class="row-nav-btn" aria-label="Poprzednia strona">←</a>
-  {% else %}
-    <span class="row-nav-btn is-disabled" aria-hidden="true">←</span>
-  {% endif %}
-  {% if page_obj.has_next %}
-    <a href="{% querystring page=page_obj.next_page_number %}" class="row-nav-btn" aria-label="Następna strona">→</a>
-  {% else %}
-    <span class="row-nav-btn is-disabled" aria-hidden="true">→</span>
-  {% endif %}
-</div>
+{% if prev_url or next_url %}
+{% if prev_url %}
+  <a href="{{ prev_url }}" class="page-nav-btn page-nav-prev" aria-label="Poprzednia strona">‹</a>
+{% else %}
+  <span class="page-nav-btn page-nav-prev is-disabled" aria-hidden="true">‹</span>
+{% endif %}
+{% if next_url %}
+  <a href="{{ next_url }}" class="page-nav-btn page-nav-next" aria-label="Następna strona">›</a>
+{% else %}
+  <span class="page-nav-btn page-nav-next is-disabled" aria-hidden="true">›</span>
+{% endif %}
 {% endif %}
